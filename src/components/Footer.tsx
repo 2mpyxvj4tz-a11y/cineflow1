@@ -9,7 +9,7 @@ export function Footer() {
           <span className="text-xl font-bold">CineFlow</span>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground font-serif">
-          CineFlow là website xem phim online, cập nhật phim mới nhất hàng ngày với chất lượng HD,4K vietsub và lồng tiếng.
+          CineFlow - Khám phá kho phim Âu Mỹ, Hàn, Trung và Việt Nam chất lượng HD, 4K với phụ đề Việt và lồng tiếng. Cập nhật mỗi ngày.
         </p>
         <p className="mt-4 text-xs text-muted-foreground">© {new Date().getFullYear()} CineFlow. Chỉ dùng cho mục đích trải nghiệm.</p>
       </div>
