@@ -5,6 +5,7 @@ import { Play, Calendar, Clock, Globe } from "lucide-react";
 import { useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Comments } from "@/components/Comments";
+import { SEO } from "@/components/SEO";
 
 export default function MovieDetail() {
   const { slug = "" } = useParams();
