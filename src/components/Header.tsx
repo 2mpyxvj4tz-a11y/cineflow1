@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, Menu, X, Moon, Sun, Film, Heart, History as HistoryIcon, Settings as SettingsIcon, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Menu, X, Moon, Sun, Heart, History as HistoryIcon, Settings as SettingsIcon, LogOut, User as UserIcon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "./AuthProvider";
 import { useQuery } from "@tanstack/react-query";
