@@ -30,8 +30,30 @@ export default function MovieDetail() {
   const episodes = data.episodes ?? m.episodes ?? [];
   const firstEp = episodes[0]?.server_data?.[0];
 
+  const desc = m.content ? m.content.replace(/<[^>]+>/g, "").slice(0, 160) : `Xem ${m.name}${m.year ? ` (${m.year})` : ""} HD vietsub miễn phí trên VPhim.`;
+  const poster = fixImg(m.poster_url || m.thumb_url);
+
   return (
     <article>
+      <SEO
+        title={m.name}
+        description={desc}
+        image={poster}
+        type="video.movie"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Movie",
+          name: m.name,
+          alternateName: m.origin_name,
+          image: poster,
+          description: desc,
+          datePublished: m.year ? String(m.year) : undefined,
+          genre: m.category?.map((c) => c.name),
+          inLanguage: "vi",
+          actor: m.actor?.filter(Boolean).map((n) => ({ "@type": "Person", name: n })),
+          director: m.director?.filter(Boolean).map((n) => ({ "@type": "Person", name: n })),
+        }}
+      />
       <div className="relative h-[55vh] min-h-[360px] w-full overflow-hidden">
         <img src={fixImg(m.thumb_url || m.poster_url)} alt={m.name} className="h-full w-full object-cover" />
         <div className="absolute inset-0 gradient-hero" />
