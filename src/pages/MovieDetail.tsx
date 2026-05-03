@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { fetchMovieDetail, fixImg } from "@/lib/phim-api";
-import { Play, Heart, Calendar, Clock, Globe } from "lucide-react";
+import { Play, Calendar, Clock, Globe } from "lucide-react";
 import { useEffect } from "react";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { Comments } from "@/components/Comments";
 
 export default function MovieDetail() {
   const { slug = "" } = useParams();
@@ -66,9 +68,8 @@ export default function MovieDetail() {
                   <Play className="h-5 w-5 fill-current" /> Xem ngay
                 </Link>
               )}
-              <button className="inline-flex items-center gap-2 rounded-md bg-foreground/10 px-6 py-3 font-semibold backdrop-blur transition-colors hover:bg-foreground/20">
-                <Heart className="h-5 w-5" /> Yêu thích
-              </button>
+              <FavoriteButton movieSlug={m.slug} movieName={m.name} posterUrl={fixImg(m.poster_url || m.thumb_url)} />
+
             </div>
 
             <div className="mt-6 grid gap-2 text-sm">
@@ -136,6 +137,8 @@ export default function MovieDetail() {
             ))}
           </section>
         )}
+
+        <Comments movieSlug={m.slug} />
       </div>
     </article>
   );

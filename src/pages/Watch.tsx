@@ -4,9 +4,13 @@ import { fetchMovieDetail, fixImg } from "@/lib/phim-api";
 import { HlsPlayer } from "@/components/HlsPlayer";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { Comments } from "@/components/Comments";
 
 export default function Watch() {
   const { slug = "", episode = "" } = useParams();
+  const { user } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["movie", slug],
     queryFn: () => fetchMovieDetail(slug),
@@ -28,6 +32,18 @@ export default function Watch() {
   useEffect(() => {
     if (m?.name && currentEp) document.title = `${m.name} - ${currentEp.name} - VPhim`;
   }, [m, currentEp]);
+
+  // Save watch history
+  useEffect(() => {
+    if (!user || !m || !currentEp) return;
+    supabase.from("watch_history").insert({
+      user_id: user.id,
+      movie_slug: m.slug,
+      episode_slug: currentEp.slug,
+      movie_name: m.name,
+      poster_url: fixImg(m.poster_url || m.thumb_url),
+    }).then(() => {});
+  }, [user, m?.slug, currentEp?.slug]);
 
   if (isLoading || !m || !currentEp) {
     return <div className="aspect-video w-full animate-pulse bg-muted" />;
@@ -101,6 +117,8 @@ export default function Watch() {
             ))}
           </div>
         </section>
+
+        <Comments movieSlug={m.slug} />
       </div>
     </div>
   );
