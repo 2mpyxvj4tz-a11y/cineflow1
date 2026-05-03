@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Hero } from "@/components/Hero";
 import { MovieRow } from "@/components/MovieRow";
+import { SEO } from "@/components/SEO";
 import { fetchListByType, fetchNewMovies } from "@/lib/phim-api";
 
 export default function Index() {
