@@ -137,6 +137,8 @@ export default function MovieDetail() {
             ))}
           </section>
         )}
+
+        <Comments movieSlug={m.slug} />
       </div>
     </article>
   );
