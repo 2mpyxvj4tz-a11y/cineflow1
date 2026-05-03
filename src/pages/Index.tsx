@@ -1,16 +1,25 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useQuery } from "@tanstack/react-query";
+import { Hero } from "@/components/Hero";
+import { MovieRow } from "@/components/MovieRow";
+import { fetchListByType, fetchNewMovies } from "@/lib/phim-api";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+export default function Index() {
+  const newQ = useQuery({ queryKey: ["new-movies"], queryFn: () => fetchNewMovies(1) });
+  const leQ = useQuery({ queryKey: ["list", "phim-le"], queryFn: () => fetchListByType("phim-le", 1) });
+  const boQ = useQuery({ queryKey: ["list", "phim-bo"], queryFn: () => fetchListByType("phim-bo", 1) });
+  const animeQ = useQuery({ queryKey: ["list", "hoat-hinh"], queryFn: () => fetchListByType("hoat-hinh", 1) });
+  const tvQ = useQuery({ queryKey: ["list", "tv-shows"], queryFn: () => fetchListByType("tv-shows", 1) });
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <>
+      <Hero movies={newQ.data?.items ?? []} />
+      <div className="-mt-24 relative z-10 space-y-2">
+        <MovieRow title="Mới cập nhật" movies={newQ.data?.items ?? []} loading={newQ.isLoading} />
+        <MovieRow title="Phim lẻ hot" movies={leQ.data?.data.items ?? []} loading={leQ.isLoading} viewAllHref="/danh-sach/phim-le" />
+        <MovieRow title="Phim bộ hot" movies={boQ.data?.data.items ?? []} loading={boQ.isLoading} viewAllHref="/danh-sach/phim-bo" />
+        <MovieRow title="Hoạt hình" movies={animeQ.data?.data.items ?? []} loading={animeQ.isLoading} viewAllHref="/danh-sach/hoat-hinh" />
+        <MovieRow title="TV Shows" movies={tvQ.data?.data.items ?? []} loading={tvQ.isLoading} viewAllHref="/danh-sach/tv-shows" />
+      </div>
+    </>
   );
-};
-
-const Index = PlaceholderIndex;
-
-export default Index;
+}
