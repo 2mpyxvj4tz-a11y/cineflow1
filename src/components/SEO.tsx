@@ -9,8 +9,8 @@ interface Props {
   noindex?: boolean;
 }
 
-const SITE_NAME = "VPhim";
-const DEFAULT_DESC = "VPhim - Xem phim online HD, 4K vietsub và lồng tiếng. Phim mới cập nhật hàng ngày: phim lẻ, phim bộ, hoạt hình, TV shows.";
+const SITE_NAME = "CineFlow";
+const DEFAULT_DESC = "CineFlow - Xem phim online HD, 4K vietsub và lồng tiếng. Phim mới cập nhật hàng ngày: phim lẻ, phim bộ, hoạt hình, TV shows.";
 
 function setMeta(selector: string, attr: "name" | "property", key: string, value: string) {
   if (!value) return;

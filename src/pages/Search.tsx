@@ -77,7 +77,7 @@ export default function SearchPage() {
     <div className="px-4 py-6 md:px-12">
       <SEO
         title={q ? `Tìm kiếm: ${q}` : "Tìm kiếm phim"}
-        description={q ? `Kết quả tìm kiếm phim cho "${q}" trên VPhim.` : undefined}
+        description={q ? `Kết quả tìm kiếm phim cho "${q}" trên CineFlow.` : undefined}
         noindex
       />
       <h1 className="mb-4 text-2xl font-bold md:text-3xl">

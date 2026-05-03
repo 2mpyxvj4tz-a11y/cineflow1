@@ -19,7 +19,7 @@ export default function Index() {
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "VPhim",
+          name: "CineFlow",
           url: window.location.origin,
         }}
       />

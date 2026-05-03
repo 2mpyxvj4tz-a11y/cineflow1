@@ -6,12 +6,12 @@ export function Footer() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-4 flex items-center gap-2 text-primary">
           <Film className="h-6 w-6" />
-          <span className="text-xl font-bold">VPhim</span>
+          <span className="text-xl font-bold">CineFlow</span>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground font-serif">
-          VPhim là website xem phim online, cập nhật phim mới nhất hàng ngày với chất lượng HD,4K vietsub và lồng tiếng.
+          CineFlow là website xem phim online, cập nhật phim mới nhất hàng ngày với chất lượng HD,4K vietsub và lồng tiếng.
         </p>
-        <p className="mt-4 text-xs text-muted-foreground">© {new Date().getFullYear()} VPhim. Chỉ dùng cho mục đích trải nghiệm.</p>
+        <p className="mt-4 text-xs text-muted-foreground">© {new Date().getFullYear()} CineFlow. Chỉ dùng cho mục đích trải nghiệm.</p>
       </div>
     </footer>
   );

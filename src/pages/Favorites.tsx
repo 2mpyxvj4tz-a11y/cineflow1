@@ -8,7 +8,7 @@ import { useEffect } from "react";
 
 export default function Favorites() {
   const { user, loading } = useAuth();
-  useEffect(() => { document.title = "Phim yêu thích - VPhim"; }, []);
+  useEffect(() => { document.title = "Phim yêu thích - CineFlow"; }, []);
 
   const { data, refetch, isLoading } = useQuery({
     queryKey: ["favorites", user?.id],

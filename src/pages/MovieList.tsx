@@ -22,7 +22,7 @@ export default function MovieList() {
   const title = TITLES[type] || "Danh sách phim";
 
   useEffect(() => {
-    document.title = `${title} - VPhim`;
+    document.title = `${title} - CineFlow`;
   }, [title]);
 
   const { data, isLoading } = useQuery({

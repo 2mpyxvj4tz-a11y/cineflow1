@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 export default function History() {
   const { user, loading } = useAuth();
-  useEffect(() => { document.title = "Lịch sử xem - VPhim"; }, []);
+  useEffect(() => { document.title = "Lịch sử xem - CineFlow"; }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["history", user?.id],

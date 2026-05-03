@@ -25,7 +25,7 @@ export default function Auth() {
   const { user } = useAuth();
 
   useEffect(() => {
-    document.title = (mode === "signup" ? "Đăng ký" : "Đăng nhập") + " - VPhim";
+    document.title = (mode === "signup" ? "Đăng ký" : "Đăng nhập") + " - CineFlow";
   }, [mode]);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function Auth() {
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-xl">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2 text-primary">
           <Film className="h-8 w-8" />
-          <span className="text-2xl font-extrabold">VPhim</span>
+          <span className="text-2xl font-extrabold">CineFlow</span>
         </Link>
         <h1 className="mb-1 text-center text-2xl font-bold">
           {mode === "signup" ? "Tạo tài khoản" : "Đăng nhập"}
