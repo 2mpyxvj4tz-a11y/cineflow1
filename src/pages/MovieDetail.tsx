@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { fetchMovieDetail, fixImg } from "@/lib/phim-api";
-import { Play, Heart, Calendar, Clock, Globe } from "lucide-react";
+import { Play, Calendar, Clock, Globe } from "lucide-react";
 import { useEffect } from "react";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { Comments } from "@/components/Comments";
 
 export default function MovieDetail() {
   const { slug = "" } = useParams();
