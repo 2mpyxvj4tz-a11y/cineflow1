@@ -48,9 +48,10 @@ export function Header() {
       }`}
     >
       <div className="flex h-16 items-center gap-4 px-4 md:px-12">
-        <Link to="/" className="flex items-center gap-2 text-primary">
-          <Film className="h-7 w-7" />
-          <span className="text-2xl font-extrabold tracking-tight">CineFlow</span>
+        <Link to="/" className="flex items-center gap-1 text-primary">
+          <span className="text-2xl md:text-3xl font-black tracking-tighter" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: "-0.04em" }}>
+            CINE<span className="text-foreground">FLOW</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
