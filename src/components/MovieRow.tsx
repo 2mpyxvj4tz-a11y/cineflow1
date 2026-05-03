@@ -46,11 +46,11 @@ export function MovieRow({ title, movies, loading, viewAllHref }: Props) {
             ? Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="aspect-[2/3] w-[140px] flex-shrink-0 animate-pulse rounded-md bg-muted md:w-[180px]"
+                  className="aspect-[2/3] w-[160px] flex-shrink-0 animate-pulse rounded-md bg-muted md:w-[200px] lg:w-[220px]"
                 />
               ))
             : movies.map((m) => (
-                <div key={m._id || m.slug} className="w-[140px] flex-shrink-0 md:w-[180px]">
+                <div key={m._id || m.slug} className="w-[160px] flex-shrink-0 md:w-[200px] lg:w-[220px]">
                   <MovieCard movie={m} />
                 </div>
               ))}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, Menu, X, Moon, Sun, Film, Heart, History as HistoryIcon, Settings as SettingsIcon, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Menu, X, Moon, Sun, Heart, History as HistoryIcon, Settings as SettingsIcon, LogOut, User as UserIcon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "./AuthProvider";
 import { useQuery } from "@tanstack/react-query";
@@ -43,14 +43,15 @@ export function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all ${
-        scrolled || mobileOpen ? "bg-background/95 backdrop-blur-md shadow-md" : "bg-gradient-to-b from-background/90 to-transparent"
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled || mobileOpen ? "bg-background shadow-md" : "bg-gradient-to-b from-black/80 via-black/40 to-transparent"
       }`}
     >
       <div className="flex h-16 items-center gap-4 px-4 md:px-12">
-        <Link to="/" className="flex items-center gap-2 text-primary">
-          <Film className="h-7 w-7" />
-          <span className="text-2xl font-extrabold tracking-tight">CineFlow</span>
+        <Link to="/" className="flex items-center gap-1 text-primary">
+          <span className="text-2xl md:text-3xl font-black tracking-tighter" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: "-0.04em" }}>
+            CINE<span className="text-foreground">FLOW</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

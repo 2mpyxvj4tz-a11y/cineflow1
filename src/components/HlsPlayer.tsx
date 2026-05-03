@@ -1,40 +1,140 @@
-import { useEffect, useRef } from "react";
-import Hls from "hls.js";
+import { useEffect, useRef, useState } from "react";
+import Hls, { type Level } from "hls.js";
+import { Settings } from "lucide-react";
 
 interface Props {
   src: string;
   poster?: string;
 }
 
+interface QualityOption {
+  label: string;
+  index: number; // -1 = auto
+  height?: number;
+}
+
+function labelForHeight(h: number): string {
+  if (h >= 2160) return "4K";
+  if (h >= 1440) return "2K";
+  if (h >= 1080) return "1080p";
+  if (h >= 720) return "720p";
+  if (h >= 480) return "480p";
+  return `${h}p`;
+}
+
 export function HlsPlayer({ src, poster }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const [levels, setLevels] = useState<QualityOption[]>([]);
+  const [currentLevel, setCurrentLevel] = useState<number>(-1);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const video = ref.current;
     if (!video || !src) return;
 
     let hls: Hls | null = null;
+    setLevels([]);
+    setCurrentLevel(-1);
+
     if (Hls.isSupported()) {
-      hls = new Hls({ enableWorker: true });
+      hls = new Hls({
+        enableWorker: true,
+        // Ưu tiên chất lượng cao: bắt đầu từ level cao nhất, ABR sẽ điều chỉnh xuống nếu băng thông yếu
+        startLevel: -1,
+        capLevelToPlayerSize: false,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        abrEwmaDefaultEstimate: 5_000_000, // giả định băng thông tốt → chọn level cao
+        testBandwidth: true,
+      });
+      hlsRef.current = hls;
       hls.loadSource(src);
       hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, (_e, data) => {
+        const opts: QualityOption[] = (data.levels as Level[])
+          .map((lv, i) => ({ label: labelForHeight(lv.height || 0), index: i, height: lv.height }))
+          .sort((a, b) => (b.height || 0) - (a.height || 0));
+        // chọn mức cao nhất theo mặc định
+        const top = opts[0];
+        if (top && hls) {
+          hls.currentLevel = top.index;
+          setCurrentLevel(top.index);
+        }
+        setLevels([{ label: "Tự động", index: -1 }, ...opts]);
+      });
+
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_e, data) => {
+        setCurrentLevel(hls?.autoLevelEnabled ? -1 : data.level);
+      });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
     }
 
     return () => {
       hls?.destroy();
+      hlsRef.current = null;
     };
   }, [src]);
 
+  const selectLevel = (idx: number) => {
+    const hls = hlsRef.current;
+    if (!hls) return;
+    if (idx === -1) {
+      hls.currentLevel = -1; // bật auto ABR
+    } else {
+      hls.currentLevel = idx;
+    }
+    setCurrentLevel(idx);
+    setMenuOpen(false);
+  };
+
+  const currentLabel =
+    currentLevel === -1
+      ? "Tự động"
+      : levels.find((l) => l.index === currentLevel)?.label || "—";
+
   return (
-    <video
-      ref={ref}
-      controls
-      autoPlay
-      poster={poster}
-      className="h-full w-full bg-black"
-      playsInline
-    />
+    <div className="relative h-full w-full bg-black">
+      <video
+        ref={ref}
+        controls
+        autoPlay
+        poster={poster}
+        className="h-full w-full bg-black"
+        playsInline
+      />
+      {levels.length > 1 && (
+        <div className="absolute right-3 top-3 z-10">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="flex items-center gap-1.5 rounded-md bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-black/90"
+            aria-label="Chọn chất lượng"
+          >
+            <Settings className="h-3.5 w-3.5" />
+            {currentLabel}
+          </button>
+          {menuOpen && (
+            <div className="mt-1 w-32 overflow-hidden rounded-md border border-white/10 bg-black/90 shadow-xl backdrop-blur">
+              {levels.map((lv) => (
+                <button
+                  key={lv.index}
+                  onClick={() => selectLevel(lv.index)}
+                  className={`block w-full px-3 py-2 text-left text-xs ${
+                    (currentLevel === lv.index)
+                      ? "bg-primary text-primary-foreground"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                >
+                  {lv.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
