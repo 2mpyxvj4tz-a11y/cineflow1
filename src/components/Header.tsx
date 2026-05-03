@@ -124,6 +124,40 @@ export function Header() {
           {resolved === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
 
+        {user ? (
+          <div className="relative" onMouseLeave={() => setUserMenu(false)}>
+            <button
+              onClick={() => setUserMenu((v) => !v)}
+              onMouseEnter={() => setUserMenu(true)}
+              aria-label="Tài khoản"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
+            >
+              {(user.user_metadata?.display_name || user.email || "U").charAt(0).toUpperCase()}
+            </button>
+            {userMenu && (
+              <div className="absolute right-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-md border border-border bg-popover shadow-xl">
+                <div className="border-b border-border px-3 py-2 text-xs text-muted-foreground truncate">{user.email}</div>
+                <Link to="/yeu-thich" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent">
+                  <Heart className="h-4 w-4" /> Yêu thích
+                </Link>
+                <Link to="/lich-su" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent">
+                  <HistoryIcon className="h-4 w-4" /> Lịch sử xem
+                </Link>
+                <Link to="/cai-dat" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent">
+                  <SettingsIcon className="h-4 w-4" /> Cài đặt
+                </Link>
+                <button onClick={() => { signOut(); setUserMenu(false); }} className="flex w-full items-center gap-2 border-t border-border px-3 py-2 text-sm hover:bg-accent">
+                  <LogOut className="h-4 w-4" /> Đăng xuất
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link to="/auth" className="hidden items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 sm:inline-flex">
+            <UserIcon className="h-4 w-4" /> Đăng nhập
+          </Link>
+        )}
+
         <button
           aria-label="Menu"
           onClick={() => setMobileOpen((v) => !v)}
@@ -132,6 +166,7 @@ export function Header() {
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
+
 
       {mobileOpen && (
         <div className="border-t border-border bg-background/95 px-4 py-3 lg:hidden">
