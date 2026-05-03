@@ -50,7 +50,7 @@ export function MovieRow({ title, movies, loading, viewAllHref }: Props) {
                 />
               ))
             : movies.map((m) => (
-                <div key={m._id || m.slug} className="w-[140px] flex-shrink-0 md:w-[180px]">
+                <div key={m._id || m.slug} className="w-[160px] flex-shrink-0 md:w-[200px] lg:w-[220px]">
                   <MovieCard movie={m} />
                 </div>
               ))}
