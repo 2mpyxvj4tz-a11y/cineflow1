@@ -117,6 +117,8 @@ export default function Watch() {
             ))}
           </div>
         </section>
+
+        <Comments movieSlug={m.slug} />
       </div>
     </div>
   );
