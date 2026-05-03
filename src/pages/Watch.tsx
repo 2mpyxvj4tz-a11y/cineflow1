@@ -10,6 +10,7 @@ import { Comments } from "@/components/Comments";
 
 export default function Watch() {
   const { slug = "", episode = "" } = useParams();
+  const { user } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["movie", slug],
     queryFn: () => fetchMovieDetail(slug),
