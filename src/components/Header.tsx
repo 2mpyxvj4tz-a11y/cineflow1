@@ -43,8 +43,8 @@ export function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all ${
-        scrolled || mobileOpen ? "bg-background/95 backdrop-blur-md shadow-md" : "bg-gradient-to-b from-background/90 to-transparent"
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled || mobileOpen ? "bg-background shadow-md" : "bg-gradient-to-b from-black/80 via-black/40 to-transparent"
       }`}
     >
       <div className="flex h-16 items-center gap-4 px-4 md:px-12">
