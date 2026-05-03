@@ -33,6 +33,18 @@ export default function Watch() {
     if (m?.name && currentEp) document.title = `${m.name} - ${currentEp.name} - VPhim`;
   }, [m, currentEp]);
 
+  // Save watch history
+  useEffect(() => {
+    if (!user || !m || !currentEp) return;
+    supabase.from("watch_history").insert({
+      user_id: user.id,
+      movie_slug: m.slug,
+      episode_slug: currentEp.slug,
+      movie_name: m.name,
+      poster_url: fixImg(m.poster_url || m.thumb_url),
+    }).then(() => {});
+  }, [user, m?.slug, currentEp?.slug]);
+
   if (isLoading || !m || !currentEp) {
     return <div className="aspect-video w-full animate-pulse bg-muted" />;
   }
