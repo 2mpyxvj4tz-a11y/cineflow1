@@ -8,9 +8,8 @@ export function Footer() {
           <Film className="h-6 w-6" />
           <span className="text-xl font-bold">VPhim</span>
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          VPhim là website xem phim online miễn phí, cập nhật phim mới nhất hàng ngày với chất lượng HD,
-          vietsub và lồng tiếng. Dữ liệu phim được cung cấp bởi KKPhim.
+        <p className="max-w-2xl text-sm text-muted-foreground font-serif">
+          VPhim là website xem phim online, cập nhật phim mới nhất hàng ngày với chất lượng HD,4K vietsub và lồng tiếng.
         </p>
         <p className="mt-4 text-xs text-muted-foreground">© {new Date().getFullYear()} VPhim. Chỉ dùng cho mục đích trải nghiệm.</p>
       </div>
