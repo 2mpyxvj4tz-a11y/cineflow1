@@ -68,9 +68,8 @@ export default function MovieDetail() {
                   <Play className="h-5 w-5 fill-current" /> Xem ngay
                 </Link>
               )}
-              <button className="inline-flex items-center gap-2 rounded-md bg-foreground/10 px-6 py-3 font-semibold backdrop-blur transition-colors hover:bg-foreground/20">
-                <Heart className="h-5 w-5" /> Yêu thích
-              </button>
+              <FavoriteButton movieSlug={m.slug} movieName={m.name} posterUrl={fixImg(m.poster_url || m.thumb_url)} />
+
             </div>
 
             <div className="mt-6 grid gap-2 text-sm">
