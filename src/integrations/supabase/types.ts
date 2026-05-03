@@ -14,7 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          movie_slug: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          movie_slug: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          movie_slug?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          movie_name: string
+          movie_slug: string
+          poster_url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          movie_name: string
+          movie_slug: string
+          poster_url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          movie_name?: string
+          movie_slug?: string
+          poster_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          theme_preference: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          theme_preference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          theme_preference?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      watch_history: {
+        Row: {
+          episode_slug: string | null
+          id: string
+          movie_name: string
+          movie_slug: string
+          poster_url: string | null
+          user_id: string
+          watched_at: string
+        }
+        Insert: {
+          episode_slug?: string | null
+          id?: string
+          movie_name: string
+          movie_slug: string
+          poster_url?: string | null
+          user_id: string
+          watched_at?: string
+        }
+        Update: {
+          episode_slug?: string | null
+          id?: string
+          movie_name?: string
+          movie_slug?: string
+          poster_url?: string | null
+          user_id?: string
+          watched_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
