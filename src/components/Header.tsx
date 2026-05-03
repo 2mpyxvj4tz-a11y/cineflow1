@@ -50,7 +50,7 @@ export function Header() {
       <div className="flex h-16 items-center gap-4 px-4 md:px-12">
         <Link to="/" className="flex items-center gap-2 text-primary">
           <Film className="h-7 w-7" />
-          <span className="text-2xl font-extrabold tracking-tight">VPhim</span>
+          <span className="text-2xl font-extrabold tracking-tight">CineFlow</span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

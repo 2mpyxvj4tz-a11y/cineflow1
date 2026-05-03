@@ -12,7 +12,7 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { document.title = "Cài đặt - VPhim"; }, []);
+  useEffect(() => { document.title = "Cài đặt - CineFlow"; }, []);
 
   useEffect(() => {
     if (!user) return;

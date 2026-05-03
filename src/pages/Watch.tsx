@@ -30,7 +30,7 @@ export default function Watch() {
   const next = epIndex >= 0 && currentServer && epIndex < currentServer.server_data.length - 1 ? currentServer.server_data[epIndex + 1] : null;
 
   useEffect(() => {
-    if (m?.name && currentEp) document.title = `${m.name} - ${currentEp.name} - VPhim`;
+    if (m?.name && currentEp) document.title = `${m.name} - ${currentEp.name} - CineFlow`;
   }, [m, currentEp]);
 
   // Save watch history

@@ -16,7 +16,7 @@ export default function MovieDetail() {
   });
 
   useEffect(() => {
-    if (data?.movie?.name) document.title = `${data.movie.name} - VPhim`;
+    if (data?.movie?.name) document.title = `${data.movie.name} - CineFlow`;
   }, [data]);
 
   if (isLoading) {
@@ -30,7 +30,7 @@ export default function MovieDetail() {
   const episodes = data.episodes ?? m.episodes ?? [];
   const firstEp = episodes[0]?.server_data?.[0];
 
-  const desc = m.content ? m.content.replace(/<[^>]+>/g, "").slice(0, 160) : `Xem ${m.name}${m.year ? ` (${m.year})` : ""} HD vietsub miễn phí trên VPhim.`;
+  const desc = m.content ? m.content.replace(/<[^>]+>/g, "").slice(0, 160) : `Xem ${m.name}${m.year ? ` (${m.year})` : ""} HD vietsub miễn phí trên CineFlow.`;
   const poster = fixImg(m.poster_url || m.thumb_url);
 
   return (
