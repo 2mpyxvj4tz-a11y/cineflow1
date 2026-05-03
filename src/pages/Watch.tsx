@@ -4,6 +4,9 @@ import { fetchMovieDetail, fixImg } from "@/lib/phim-api";
 import { HlsPlayer } from "@/components/HlsPlayer";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { Comments } from "@/components/Comments";
 
 export default function Watch() {
   const { slug = "", episode = "" } = useParams();
