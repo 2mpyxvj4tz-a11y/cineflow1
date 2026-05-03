@@ -22,6 +22,8 @@ export function Header() {
   const [genreOpen, setGenreOpen] = useState(false);
   const navigate = useNavigate();
   const { resolved, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  const [userMenu, setUserMenu] = useState(false);
 
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories, staleTime: 1000 * 60 * 60 });
 
