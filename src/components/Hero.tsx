@@ -54,7 +54,7 @@ export function Hero({ movies }: Props) {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              to={`/xem/${current.slug}`}
+              to={`/phim/${current.slug}`}
               className="inline-flex items-center gap-2 rounded bg-white px-7 py-3 text-base font-bold text-black transition-all hover:bg-white/80"
             >
               <Play className="h-6 w-6 fill-current" /> Phát
