@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { fixImg, type PhimItem } from "@/lib/phim-api";
 import { Play, Star } from "lucide-react";
+import { useCardZoom } from "./CardZoomProvider";
 
 interface Props {
   movie: PhimItem;
@@ -14,10 +15,13 @@ export function MovieCard({ movie, variant = "portrait" }: Props) {
       : fixImg(movie.poster_url || movie.thumb_url);
 
   const isHighQ = /4k|2k|fhd|1080/i.test(movie.quality || "");
+  const { openZoom } = useCardZoom();
+  const to = `/phim/${movie.slug}`;
 
   return (
     <Link
-      to={`/phim/${movie.slug}`}
+      to={to}
+      onClick={(e) => openZoom(e, { src: img, to, borderRadius: 6 })}
       className="group relative block overflow-hidden rounded-md bg-card will-change-transform transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.08] hover:z-20 nf-card-shadow hover:shadow-[0_20px_50px_-12px_hsl(357_92%_47%/0.5)]"
     >
       <div className={variant === "landscape" ? "aspect-video" : "aspect-[2/3]"}>
