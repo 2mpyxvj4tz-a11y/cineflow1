@@ -18,14 +18,14 @@ export function MovieCard({ movie, variant = "portrait" }: Props) {
   return (
     <Link
       to={`/phim/${movie.slug}`}
-      className="group relative block overflow-hidden rounded-md bg-card transition-all duration-300 hover:scale-[1.08] hover:z-20 nf-card-shadow"
+      className="group relative block overflow-hidden rounded-md bg-card will-change-transform transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.08] hover:z-20 nf-card-shadow hover:shadow-[0_20px_50px_-12px_hsl(357_92%_47%/0.5)]"
     >
       <div className={variant === "landscape" ? "aspect-video" : "aspect-[2/3]"}>
         <img
           src={img}
           alt={movie.name}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110"
           onError={(e) => ((e.currentTarget as HTMLImageElement).src = "/placeholder.svg")}
         />
       </div>
