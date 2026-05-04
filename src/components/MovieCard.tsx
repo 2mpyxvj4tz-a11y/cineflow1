@@ -43,7 +43,7 @@ export function MovieCard({ movie, variant = "portrait" }: Props) {
           {movie.quality}
         </span>
       )}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-500 ease-out sm:translate-y-2 sm:group-hover:translate-y-0">
         <div className="flex items-center gap-2 text-white">
           <Play className="h-4 w-4 fill-current text-primary" />
           <h3 className="line-clamp-1 text-sm font-bold">{movie.name}</h3>
