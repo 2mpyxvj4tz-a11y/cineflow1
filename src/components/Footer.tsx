@@ -4,9 +4,15 @@ export function Footer() {
   return (
     <footer className="mt-16 border-t border-border bg-card/40 px-4 py-10 md:px-12">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-4 flex items-center gap-1">
+        <div className="mb-4 flex items-end gap-1.5">
           <span className="text-xl font-black tracking-tighter text-primary" style={{ letterSpacing: "-0.04em" }}>
             CINE<span className="text-foreground">FLOW</span>
+          </span>
+          <span
+            className="-mb-0.5 text-xs italic text-foreground/60"
+            style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive", fontWeight: 600 }}
+          >
+            Phuc
           </span>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">

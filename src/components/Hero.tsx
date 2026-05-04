@@ -26,20 +26,26 @@ export function Hero({ movies }: Props) {
   return (
     <section className="relative h-[85vh] min-h-[560px] w-full overflow-hidden">
       {slides.map((m, i) => (
-        <img
+        <div
           key={m.slug}
-          src={fixImg(m.thumb_url || m.poster_url)}
-          alt={m.name}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-            i === idx ? "opacity-100" : "opacity-0"
+          className={`absolute inset-0 transition-opacity ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            i === idx ? "opacity-100 duration-[1400ms]" : "opacity-0 duration-700"
           }`}
-        />
+        >
+          <img
+            src={fixImg(m.thumb_url || m.poster_url)}
+            alt={m.name}
+            className={`h-full w-full object-cover will-change-transform ${
+              i === idx ? "animate-[kenburns_8s_ease-out_forwards]" : ""
+            }`}
+          />
+        </div>
       ))}
       <div className="absolute inset-0 gradient-hero-side" />
       <div className="absolute inset-0 gradient-hero" />
 
       <div className="absolute inset-x-0 bottom-0 px-4 pb-24 md:px-16 md:pb-32">
-        <div className="max-w-2xl">
+        <div key={current.slug} className="max-w-2xl animate-[heroIn_900ms_cubic-bezier(0.22,1,0.36,1)_both]">
           <h1 className="mb-4 text-4xl font-black leading-none text-white text-shadow-lg md:text-7xl">
             {current.name}
           </h1>
@@ -55,13 +61,13 @@ export function Hero({ movies }: Props) {
           <div className="flex flex-wrap gap-3">
             <Link
               to={`/phim/${current.slug}`}
-              className="inline-flex items-center gap-2 rounded bg-white px-7 py-3 text-base font-bold text-black transition-all hover:bg-white/80"
+              className="inline-flex items-center gap-2 rounded bg-white px-7 py-3 text-base font-bold text-black transition-all duration-500 ease-out hover:scale-[1.04] hover:bg-white/90 hover:shadow-2xl"
             >
               <Play className="h-6 w-6 fill-current" /> Phát
             </Link>
             <Link
               to={`/phim/${current.slug}`}
-              className="inline-flex items-center gap-2 rounded bg-white/25 px-7 py-3 text-base font-bold text-white backdrop-blur transition-colors hover:bg-white/40"
+              className="inline-flex items-center gap-2 rounded bg-white/25 px-7 py-3 text-base font-bold text-white backdrop-blur transition-all duration-500 ease-out hover:scale-[1.04] hover:bg-white/40"
             >
               <Info className="h-6 w-6" /> Thông tin
             </Link>
@@ -73,7 +79,7 @@ export function Hero({ movies }: Props) {
               key={i}
               aria-label={`Slide ${i + 1}`}
               onClick={() => setIdx(i)}
-              className={`h-1 rounded-full transition-all ${i === idx ? "w-10 bg-primary" : "w-4 bg-white/40"}`}
+              className={`h-1 rounded-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${i === idx ? "w-10 bg-primary" : "w-4 bg-white/40 hover:bg-white/70"}`}
             />
           ))}
         </div>
