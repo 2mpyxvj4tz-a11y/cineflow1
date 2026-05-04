@@ -48,9 +48,15 @@ export function Header() {
       }`}
     >
       <div className="flex h-16 items-center gap-4 px-4 md:px-12">
-        <Link to="/" className="flex items-center gap-1 text-primary">
-          <span className="text-2xl md:text-3xl font-black tracking-tighter" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: "-0.04em" }}>
+        <Link to="/" className="group/logo flex items-end gap-1.5 text-primary transition-transform duration-500 ease-out hover:scale-105">
+          <span className="text-2xl md:text-3xl font-black tracking-tighter transition-all duration-500" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: "-0.04em" }}>
             CINE<span className="text-foreground">FLOW</span>
+          </span>
+          <span
+            className="relative -mb-0.5 ml-0.5 select-none text-xs md:text-sm italic text-foreground/60 transition-all duration-500 ease-out group-hover/logo:text-primary group-hover/logo:-translate-y-0.5"
+            style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive", fontWeight: 600 }}
+          >
+            Phuc
           </span>
         </Link>
 
