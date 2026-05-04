@@ -159,11 +159,7 @@ export function Header() {
               </div>
             )}
           </div>
-        ) : (
-          <Link to="/auth" className="hidden items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 sm:inline-flex">
-            <UserIcon className="h-4 w-4" /> Đăng nhập
-          </Link>
-        )}
+        ) : null}
 
         <button
           aria-label="Menu"
