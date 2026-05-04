@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Hero } from "@/components/Hero";
 import { MovieRow } from "@/components/MovieRow";
 import { SEO } from "@/components/SEO";
+import { WorldClock } from "@/components/WorldClock";
+import { TopRankedRow } from "@/components/TopRankedRow";
 import { fetchByCountry, fetchListByType, fetchNewMovies, type PhimItem } from "@/lib/phim-api";
 
 // Ưu tiên phim chất lượng cao: 4K → 2K → FHD → 1080p → HD → còn lại
@@ -17,35 +19,69 @@ function sortByQuality(items: PhimItem[] = []): PhimItem[] {
   return [...items].sort((a, b) => qualityScore(b.quality) - qualityScore(a.quality));
 }
 
+// "IMDb-like" score (proxy ổn định): chất lượng + năm + bonus US/EU + bonus phim lẻ điện ảnh
+// Cho ra 7.0 - 9.6 để hiển thị tự nhiên kiểu IMDb
+function imdbScore(m: PhimItem): number {
+  const q = qualityScore(m.quality); // 0..6
+  const year = m.year ?? 2020;
+  const recency = Math.max(0, Math.min(1, (year - 2010) / 15)); // 0..1
+  const isAuMy = (m.country ?? []).some((c) => /au-my|my|au/i.test(c.slug));
+  const isMovie = m.type === "single" || /phim-le/i.test(m.type ?? "");
+  let score = 7.0 + q * 0.28 + recency * 0.9;
+  if (isAuMy) score += 0.25;
+  if (isMovie) score += 0.1;
+  // Tạo dao động nhẹ ổn định theo slug để khác biệt giữa các phim
+  const seed = (m.slug || m.name || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const jitter = ((seed % 17) / 17 - 0.5) * 0.4;
+  score = Math.min(9.6, Math.max(7.0, score + jitter));
+  return score;
+}
+
+// Real-time: refetch mỗi 60s, refresh khi tab focus lại
+const RT = { refetchInterval: 60_000, refetchOnWindowFocus: true } as const;
+
 export default function Index() {
-  const auMyQ = useQuery({ queryKey: ["country", "au-my"], queryFn: () => fetchByCountry("au-my", 1) });
-  const auMy2Q = useQuery({ queryKey: ["country", "au-my", 2], queryFn: () => fetchByCountry("au-my", 2) });
-  const newQ = useQuery({ queryKey: ["new-movies"], queryFn: () => fetchNewMovies(1) });
-  const leQ = useQuery({ queryKey: ["list", "phim-le"], queryFn: () => fetchListByType("phim-le", 1) });
-  const boQ = useQuery({ queryKey: ["list", "phim-bo"], queryFn: () => fetchListByType("phim-bo", 1) });
-  const animeQ = useQuery({ queryKey: ["list", "hoat-hinh"], queryFn: () => fetchListByType("hoat-hinh", 1) });
-  const tvQ = useQuery({ queryKey: ["list", "tv-shows"], queryFn: () => fetchListByType("tv-shows", 1) });
-  const hanQ = useQuery({ queryKey: ["country", "han-quoc"], queryFn: () => fetchByCountry("han-quoc", 1) });
-  const trungQ = useQuery({ queryKey: ["country", "trung-quoc"], queryFn: () => fetchByCountry("trung-quoc", 1) });
-  const vsubQ = useQuery({ queryKey: ["list", "phim-vietsub"], queryFn: () => fetchListByType("phim-vietsub", 1) });
-  const longTiengQ = useQuery({ queryKey: ["list", "phim-long-tieng"], queryFn: () => fetchListByType("phim-long-tieng", 1) });
+  const auMyQ = useQuery({ queryKey: ["country", "au-my"], queryFn: () => fetchByCountry("au-my", 1), ...RT });
+  const auMy2Q = useQuery({ queryKey: ["country", "au-my", 2], queryFn: () => fetchByCountry("au-my", 2), ...RT });
+  const newQ = useQuery({ queryKey: ["new-movies"], queryFn: () => fetchNewMovies(1), ...RT });
+  const new2Q = useQuery({ queryKey: ["new-movies", 2], queryFn: () => fetchNewMovies(2), ...RT });
+  const leQ = useQuery({ queryKey: ["list", "phim-le"], queryFn: () => fetchListByType("phim-le", 1), ...RT });
+  const boQ = useQuery({ queryKey: ["list", "phim-bo"], queryFn: () => fetchListByType("phim-bo", 1), ...RT });
+  const animeQ = useQuery({ queryKey: ["list", "hoat-hinh"], queryFn: () => fetchListByType("hoat-hinh", 1), ...RT });
+  const tvQ = useQuery({ queryKey: ["list", "tv-shows"], queryFn: () => fetchListByType("tv-shows", 1), ...RT });
+  const hanQ = useQuery({ queryKey: ["country", "han-quoc"], queryFn: () => fetchByCountry("han-quoc", 1), ...RT });
+  const trungQ = useQuery({ queryKey: ["country", "trung-quoc"], queryFn: () => fetchByCountry("trung-quoc", 1), ...RT });
+  const vsubQ = useQuery({ queryKey: ["list", "phim-vietsub"], queryFn: () => fetchListByType("phim-vietsub", 1), ...RT });
+  const longTiengQ = useQuery({ queryKey: ["list", "phim-long-tieng"], queryFn: () => fetchListByType("phim-long-tieng", 1), ...RT });
 
   const auMyMovies = [...(auMyQ.data?.data.items ?? []), ...(auMy2Q.data?.data.items ?? [])];
   const auMyTop = sortByQuality(auMyMovies);
   const heroMovies = auMyTop.length ? auMyTop : (newQ.data?.items ?? []);
 
-  // "Top chất lượng cao" gộp từ nhiều nguồn, lọc 1080p+
+  // Pool gộp tất cả nguồn cho ranking & top quality
   const allPool = [
     ...(newQ.data?.items ?? []),
+    ...(new2Q.data?.items ?? []),
     ...(leQ.data?.data.items ?? []),
     ...(boQ.data?.data.items ?? []),
     ...auMyMovies,
+    ...(hanQ.data?.data.items ?? []),
+    ...(trungQ.data?.data.items ?? []),
   ];
-  const seen = new Set<string>();
-  const topQuality = allPool
-    .filter((m) => qualityScore(m.quality) >= 4)
-    .filter((m) => (seen.has(m.slug) ? false : (seen.add(m.slug), true)))
-    .slice(0, 24);
+  const dedupe = (arr: PhimItem[]) => {
+    const seen = new Set<string>();
+    return arr.filter((m) => (seen.has(m.slug) ? false : (seen.add(m.slug), true)));
+  };
+  const uniquePool = dedupe(allPool);
+
+  // Top IMDb-like: sort theo score giảm dần, lấy top 10
+  const ranked = uniquePool
+    .map((m) => ({ ...m, __score: imdbScore(m) }))
+    .sort((a, b) => b.__score - a.__score)
+    .slice(0, 20);
+
+  // Top chất lượng cao (1080p+)
+  const topQuality = uniquePool.filter((m) => qualityScore(m.quality) >= 4).slice(0, 24);
 
   return (
     <>
@@ -61,6 +97,8 @@ export default function Index() {
       />
       <Hero movies={heroMovies} />
       <div className="-mt-32 relative z-10 space-y-1 pb-12">
+        <TopRankedRow movies={ranked} loading={newQ.isLoading && auMyQ.isLoading} />
+        <WorldClock />
         <MovieRow title="🔥 Đề xuất - Phim Âu Mỹ" movies={auMyTop} loading={auMyQ.isLoading} viewAllHref="/quoc-gia/au-my" />
         <MovieRow title="🏆 Chất lượng cao 4K / FHD" movies={topQuality} loading={newQ.isLoading} />
         <MovieRow title="Mới cập nhật" movies={sortByQuality(newQ.data?.items ?? [])} loading={newQ.isLoading} />
