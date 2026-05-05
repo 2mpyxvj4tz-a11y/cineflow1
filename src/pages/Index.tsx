@@ -54,6 +54,18 @@ export default function Index() {
   const trungQ = useQuery({ queryKey: ["country", "trung-quoc"], queryFn: () => fetchByCountry("trung-quoc", 1), ...RT });
   const vsubQ = useQuery({ queryKey: ["list", "phim-vietsub"], queryFn: () => fetchListByType("phim-vietsub", 1), ...RT });
   const longTiengQ = useQuery({ queryKey: ["list", "phim-long-tieng"], queryFn: () => fetchListByType("phim-long-tieng", 1), ...RT });
+  const donghuaQ = useQuery({
+    queryKey: ["donghua-local"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("donghua_movies")
+        .select("slug,name,origin_name,poster_url,thumb_url,year,quality,episode_current")
+        .order("updated_at", { ascending: false })
+        .limit(24);
+      return (data ?? []).map((m) => ({ ...m, type: "hoathinh" })) as PhimItem[];
+    },
+    ...RT,
+  });
 
   const auMyMovies = [...(auMyQ.data?.data.items ?? []), ...(auMy2Q.data?.data.items ?? [])];
   const auMyTop = sortByQuality(auMyMovies);
