@@ -50,13 +50,55 @@ export function WorldClock() {
   const saved = typeof window !== "undefined" ? localStorage.getItem("cf_clock_zones") : null;
   const initial: string[] = saved ? JSON.parse(saved) : ["Asia/Ho_Chi_Minh", "America/Los_Angeles", "Europe/London"];
   const [active, setActive] = useState<string[]>(initial);
+  const [offset, setOffset] = useState(0); // serverTime - clientTime (ms)
   const [now, setNow] = useState(new Date());
   const [picker, setPicker] = useState(false);
 
+  // Đồng bộ giờ với server chuẩn (không phụ thuộc đồng hồ máy người dùng)
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
+    let cancelled = false;
+    const sync = async () => {
+      const sources = [
+        "https://worldtimeapi.org/api/timezone/Etc/UTC",
+        "https://timeapi.io/api/Time/current/zone?timeZone=UTC",
+      ];
+      for (const url of sources) {
+        try {
+          const t0 = Date.now();
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) continue;
+          const t1 = Date.now();
+          const rtt = t1 - t0;
+          // Ưu tiên header Date (chính xác, độ trễ thấp)
+          const dateHeader = res.headers.get("date");
+          let serverMs: number | null = null;
+          if (dateHeader) serverMs = new Date(dateHeader).getTime();
+          if (!serverMs || Number.isNaN(serverMs)) {
+            const data = await res.json().catch(() => null);
+            const iso = data?.utc_datetime || data?.dateTime;
+            if (iso) serverMs = new Date(iso).getTime();
+          }
+          if (!serverMs || Number.isNaN(serverMs)) continue;
+          const off = serverMs + rtt / 2 - t1;
+          if (!cancelled) setOffset(off);
+          return;
+        } catch {
+          /* try next */
+        }
+      }
+    };
+    sync();
+    const resync = setInterval(sync, 5 * 60 * 1000); // re-sync mỗi 5 phút
+    return () => {
+      cancelled = true;
+      clearInterval(resync);
+    };
   }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date(Date.now() + offset)), 1000);
+    return () => clearInterval(t);
+  }, [offset]);
 
   useEffect(() => {
     localStorage.setItem("cf_clock_zones", JSON.stringify(active));
