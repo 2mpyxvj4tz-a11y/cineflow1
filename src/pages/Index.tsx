@@ -5,6 +5,7 @@ import { SEO } from "@/components/SEO";
 import { WorldClock } from "@/components/WorldClock";
 import { TopRankedRow } from "@/components/TopRankedRow";
 import { fetchByCountry, fetchListByType, fetchNewMovies, type PhimItem } from "@/lib/phim-api";
+import { supabase } from "@/integrations/supabase/client";
 
 // Ưu tiên phim chất lượng cao: 4K → 2K → FHD → 1080p → HD → còn lại
 const QUALITY_RANK: Record<string, number> = {
