@@ -112,6 +112,9 @@ export default function Index() {
       <div className="-mt-32 relative z-10 space-y-1 pb-12">
         <TopRankedRow movies={ranked} loading={newQ.isLoading && auMyQ.isLoading} />
         <WorldClock />
+        {(donghuaQ.data?.length ?? 0) > 0 && (
+          <MovieRow title="🐉 Hoạt hình 3D Donghua" movies={donghuaQ.data ?? []} loading={donghuaQ.isLoading} />
+        )}
         <MovieRow title="🔥 Đề xuất - Phim Âu Mỹ" movies={auMyTop} loading={auMyQ.isLoading} viewAllHref="/quoc-gia/au-my" />
         <MovieRow title="🏆 Chất lượng cao 4K / FHD" movies={topQuality} loading={newQ.isLoading} />
         <MovieRow title="Mới cập nhật" movies={sortByQuality(newQ.data?.items ?? [])} loading={newQ.isLoading} />
