@@ -5,6 +5,7 @@ import { SEO } from "@/components/SEO";
 import { WorldClock } from "@/components/WorldClock";
 import { TopRankedRow } from "@/components/TopRankedRow";
 import { fetchByCountry, fetchListByType, fetchNewMovies, type PhimItem } from "@/lib/phim-api";
+import { supabase } from "@/integrations/supabase/client";
 
 // Ưu tiên phim chất lượng cao: 4K → 2K → FHD → 1080p → HD → còn lại
 const QUALITY_RANK: Record<string, number> = {
@@ -53,6 +54,18 @@ export default function Index() {
   const trungQ = useQuery({ queryKey: ["country", "trung-quoc"], queryFn: () => fetchByCountry("trung-quoc", 1), ...RT });
   const vsubQ = useQuery({ queryKey: ["list", "phim-vietsub"], queryFn: () => fetchListByType("phim-vietsub", 1), ...RT });
   const longTiengQ = useQuery({ queryKey: ["list", "phim-long-tieng"], queryFn: () => fetchListByType("phim-long-tieng", 1), ...RT });
+  const donghuaQ = useQuery({
+    queryKey: ["donghua-local"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("donghua_movies")
+        .select("slug,name,origin_name,poster_url,thumb_url,year,quality,episode_current")
+        .order("updated_at", { ascending: false })
+        .limit(24);
+      return (data ?? []).map((m) => ({ ...m, type: "hoathinh" })) as PhimItem[];
+    },
+    ...RT,
+  });
 
   const auMyMovies = [...(auMyQ.data?.data.items ?? []), ...(auMy2Q.data?.data.items ?? [])];
   const auMyTop = sortByQuality(auMyMovies);
@@ -99,6 +112,9 @@ export default function Index() {
       <div className="-mt-32 relative z-10 space-y-1 pb-12">
         <TopRankedRow movies={ranked} loading={newQ.isLoading && auMyQ.isLoading} />
         <WorldClock />
+        {(donghuaQ.data?.length ?? 0) > 0 && (
+          <MovieRow title="🐉 Hoạt hình 3D Donghua" movies={donghuaQ.data ?? []} loading={donghuaQ.isLoading} />
+        )}
         <MovieRow title="🔥 Đề xuất - Phim Âu Mỹ" movies={auMyTop} loading={auMyQ.isLoading} viewAllHref="/quoc-gia/au-my" />
         <MovieRow title="🏆 Chất lượng cao 4K / FHD" movies={topQuality} loading={newQ.isLoading} />
         <MovieRow title="Mới cập nhật" movies={sortByQuality(newQ.data?.items ?? [])} loading={newQ.isLoading} />

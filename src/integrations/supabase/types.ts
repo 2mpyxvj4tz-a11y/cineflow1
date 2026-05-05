@@ -41,6 +41,110 @@ export type Database = {
         }
         Relationships: []
       }
+      donghua_episodes: {
+        Row: {
+          created_at: string
+          embed_url: string | null
+          episode_name: string
+          episode_number: number
+          episode_slug: string
+          id: string
+          m3u8_url: string | null
+          movie_id: string
+          source_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          embed_url?: string | null
+          episode_name: string
+          episode_number: number
+          episode_slug: string
+          id?: string
+          m3u8_url?: string | null
+          movie_id: string
+          source_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          embed_url?: string | null
+          episode_name?: string
+          episode_number?: number
+          episode_slug?: string
+          id?: string
+          m3u8_url?: string | null
+          movie_id?: string
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donghua_episodes_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "donghua_movies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donghua_movies: {
+        Row: {
+          created_at: string
+          description: string | null
+          episode_current: string | null
+          id: string
+          lang: string | null
+          last_synced_at: string
+          name: string
+          origin_name: string | null
+          poster_url: string | null
+          quality: string | null
+          slug: string
+          source: string
+          source_url: string
+          thumb_url: string | null
+          total_episodes: number | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          episode_current?: string | null
+          id?: string
+          lang?: string | null
+          last_synced_at?: string
+          name: string
+          origin_name?: string | null
+          poster_url?: string | null
+          quality?: string | null
+          slug: string
+          source?: string
+          source_url: string
+          thumb_url?: string | null
+          total_episodes?: number | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          episode_current?: string | null
+          id?: string
+          lang?: string | null
+          last_synced_at?: string
+          name?: string
+          origin_name?: string | null
+          poster_url?: string | null
+          quality?: string | null
+          slug?: string
+          source?: string
+          source_url?: string
+          thumb_url?: string | null
+          total_episodes?: number | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -92,6 +196,36 @@ export type Database = {
           id?: string
           theme_preference?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sync_logs: {
+        Row: {
+          episodes_added: number | null
+          error_message: string | null
+          id: string
+          movies_added: number | null
+          ran_at: string
+          source: string
+          status: string
+        }
+        Insert: {
+          episodes_added?: number | null
+          error_message?: string | null
+          id?: string
+          movies_added?: number | null
+          ran_at?: string
+          source: string
+          status: string
+        }
+        Update: {
+          episodes_added?: number | null
+          error_message?: string | null
+          id?: string
+          movies_added?: number | null
+          ran_at?: string
+          source?: string
+          status?: string
         }
         Relationships: []
       }
