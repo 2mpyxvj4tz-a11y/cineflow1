@@ -85,28 +85,25 @@ export default function SearchPage() {
       </h1>
 
       {q && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
-          <FilterGroup
-            label="Phụ đề"
-            options={LANG_OPTIONS}
-            value={langFilter}
-            onChange={(v) => updateParam("lang", v)}
-          />
-          <div className="hidden h-6 w-px bg-border md:block" />
-          <FilterGroup
-            label="Chất lượng"
-            options={QUALITY_OPTIONS}
-            value={qualityFilter}
-            onChange={(v) => updateParam("quality", v)}
-          />
-          {hasFilters && (
-            <button
-              onClick={() => { const n = new URLSearchParams(); if (q) n.set("q", q); setParams(n); }}
-              className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent"
-            >
-              <X className="h-3.5 w-3.5" /> Xoá lọc
-            </button>
-          )}
+        <div className="mb-6 space-y-4 rounded-lg border border-border bg-card p-4">
+          <LangPosterFilter value={langFilter} onChange={(v) => updateParam("lang", v)} />
+          <div className="h-px w-full bg-border" />
+          <div className="flex flex-wrap items-center gap-3">
+            <FilterGroup
+              label="Chất lượng"
+              options={QUALITY_OPTIONS}
+              value={qualityFilter}
+              onChange={(v) => updateParam("quality", v)}
+            />
+            {hasFilters && (
+              <button
+                onClick={() => { const n = new URLSearchParams(); if (q) n.set("q", q); setParams(n); }}
+                className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent"
+              >
+                <X className="h-3.5 w-3.5" /> Xoá lọc
+              </button>
+            )}
+          </div>
         </div>
       )}
 
