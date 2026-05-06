@@ -20,12 +20,14 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [genreOpen, setGenreOpen] = useState(false);
+  const [countryOpen, setCountryOpen] = useState(false);
   const navigate = useNavigate();
   const { resolved, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [userMenu, setUserMenu] = useState(false);
 
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories, staleTime: 1000 * 60 * 60 });
+  const { data: countries = [] } = useQuery({ queryKey: ["countries"], queryFn: fetchCountries, staleTime: 1000 * 60 * 60 });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
