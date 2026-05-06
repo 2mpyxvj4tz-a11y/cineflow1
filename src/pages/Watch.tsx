@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Comments } from "@/components/Comments";
+import { WatchPartyDialog } from "@/components/WatchPartyDialog";
 
 export default function Watch() {
   const { slug = "", episode = "" } = useParams();
