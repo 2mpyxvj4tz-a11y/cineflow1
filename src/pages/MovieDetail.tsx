@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Comments } from "@/components/Comments";
 import { SEO } from "@/components/SEO";
+import { ActorAvatars } from "@/components/ActorAvatars";
+import { WatchPartyDialog } from "@/components/WatchPartyDialog";
 
 export default function MovieDetail() {
   const { slug = "" } = useParams();
