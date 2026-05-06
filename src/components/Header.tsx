@@ -100,6 +100,29 @@ export function Header() {
               </div>
             )}
           </div>
+          <div className="relative" onMouseLeave={() => setCountryOpen(false)}>
+            <button
+              onMouseEnter={() => setCountryOpen(true)}
+              onClick={() => setCountryOpen((v) => !v)}
+              className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-foreground rounded-md"
+            >
+              Quốc gia
+            </button>
+            {countryOpen && (
+              <div className="absolute left-0 top-full mt-1 grid w-[520px] grid-cols-3 gap-1 rounded-md border border-border bg-popover p-3 shadow-xl">
+                {countries.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/quoc-gia/${c.slug}`}
+                    onClick={() => setCountryOpen(false)}
+                    className="rounded px-2 py-1.5 text-sm text-popover-foreground/80 hover:bg-accent hover:text-foreground"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="flex-1" />
