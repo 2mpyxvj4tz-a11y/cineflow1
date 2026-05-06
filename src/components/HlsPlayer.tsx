@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Hls, { type Level } from "hls.js";
-import { Settings } from "lucide-react";
+import { Settings, RotateCcw, RotateCw } from "lucide-react";
 
 interface Props {
   src: string;
