@@ -17,6 +17,7 @@ import Favorites from "./pages/Favorites.tsx";
 import History from "./pages/History.tsx";
 import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import WatchParty from "./pages/WatchParty.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: 1 } },
