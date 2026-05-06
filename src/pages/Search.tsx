@@ -1,16 +1,16 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { searchMovies } from "@/lib/phim-api";
+import { searchMovies, fetchListByType, fixImg } from "@/lib/phim-api";
 import { MovieGrid } from "@/components/MovieGrid";
 import { Pagination } from "@/components/Pagination";
 import { SEO } from "@/components/SEO";
 import { X } from "lucide-react";
 
 const LANG_OPTIONS = [
-  { value: "vietsub", label: "Vietsub" },
-  { value: "long-tieng", label: "Lồng tiếng" },
-  { value: "thuyet-minh", label: "Thuyết minh" },
+  { value: "vietsub", label: "Vietsub", listType: "phim-vietsub" as const },
+  { value: "long-tieng", label: "Lồng tiếng", listType: "phim-long-tieng" as const },
+  { value: "thuyet-minh", label: "Thuyết minh", listType: "phim-thuyet-minh" as const },
 ];
 
 const QUALITY_OPTIONS = [
