@@ -95,8 +95,28 @@ export function HlsPlayer({ src, poster }: Props) {
       ? "Tự động"
       : levels.find((l) => l.index === currentLevel)?.label || "—";
 
+  const seekBy = (sec: number) => {
+    const v = ref.current;
+    if (!v) return;
+    v.currentTime = Math.max(0, Math.min((v.duration || Infinity), v.currentTime + sec));
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const v = ref.current;
+      if (!v) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); seekBy(-5); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); seekBy(5); }
+      else if (e.code === "Space") { e.preventDefault(); v.paused ? v.play() : v.pause(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
-    <div className="relative h-full w-full bg-black">
+    <div className="relative h-full w-full bg-black group">
       <video
         ref={ref}
         controls
@@ -105,6 +125,27 @@ export function HlsPlayer({ src, poster }: Props) {
         className="h-full w-full bg-black"
         playsInline
       />
+      {/* Tua ±5s */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-6 md:px-16 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          type="button"
+          onClick={() => seekBy(-5)}
+          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80 hover:scale-110 transition"
+          aria-label="Lùi 5 giây"
+          title="Lùi 5s (←)"
+        >
+          <RotateCcw className="h-6 w-6" />
+        </button>
+        <button
+          type="button"
+          onClick={() => seekBy(5)}
+          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80 hover:scale-110 transition"
+          aria-label="Tới 5 giây"
+          title="Tới 5s (→)"
+        >
+          <RotateCw className="h-6 w-6" />
+        </button>
+      </div>
       {levels.length > 1 && (
         <div className="absolute right-3 top-3 z-10">
           <button
