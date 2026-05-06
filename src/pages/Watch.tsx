@@ -82,6 +82,12 @@ export default function Watch() {
               Tập sau <ChevronRight className="h-4 w-4" />
             </Link>
           )}
+          <WatchPartyDialog
+            movieSlug={m.slug}
+            movieName={m.name}
+            posterUrl={fixImg(m.poster_url || m.thumb_url)}
+            episodeSlug={currentEp.slug}
+          />
         </div>
 
         {episodes.length > 1 && (
