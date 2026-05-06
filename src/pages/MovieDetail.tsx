@@ -148,6 +148,8 @@ export default function MovieDetail() {
           </div>
         </div>
 
+        <ActorAvatars actors={m.actor ?? []} />
+
         {episodes.length > 0 && (
           <section className="mt-10">
             <h2 className="mb-4 text-2xl font-bold">Danh sách tập</h2>
