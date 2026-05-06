@@ -1,88 +1,89 @@
+## Mục tiêu
 
-# Kế hoạch: Web xem phim phong cách Netflix
+Thêm 5 tính năng vào CineFlow:
+1. Menu **Quốc gia** trên header để lọc phim theo nước
+2. Nút **tua ±5 giây** trong trình phát
+3. **Phòng xem chung** (tối đa 40 người) có chat + voice (mic on/off/mute)
+4. Tab chọn **Vietsub / Thuyết minh / Lồng tiếng** to hơn, có poster phim
+5. Hàng **diễn viên** dạng avatar tròn ở dưới mô tả phim
 
-## Tổng quan
-Xây dựng web xem phim tiếng Việt sử dụng API miễn phí KKPhim (phim.nguonc.com / phimapi.com) làm nguồn dữ liệu chính. Giao diện tối giản giống Netflix, hỗ trợ dark/light mode, có hệ thống tài khoản người dùng với yêu thích và bình luận.
+---
 
-## Nguồn dữ liệu phim
-- **KKPhim API** (https://phimapi.com): API công khai, không cần key, có hàng nghìn phim Việt sub/lồng tiếng, link HLS (.m3u8) sẵn sàng phát.
-- Endpoints chính: phim mới cập nhật, chi tiết phim theo slug, tìm kiếm, danh sách theo thể loại/quốc gia/năm.
+### 1. Menu Quốc gia (Header)
 
-## Các trang & tính năng
+`src/components/Header.tsx`:
+- Thêm dropdown "Quốc gia" cạnh "Thể loại", dùng `fetchCountries()` (đã có sẵn trong `phim-api.ts`).
+- Click → điều hướng `/quoc-gia/:slug` (route đã tồn tại trong `App.tsx` → `Category` mode="country").
+- Hiển thị grid 3 cột trên desktop, accordion trên mobile (giống dropdown thể loại hiện tại).
 
-### 1. Trang chủ
-- Hero banner carousel: phim hot (auto-slide)
-- Các hàng phim cuộn ngang: "Phim mới cập nhật", "Phim lẻ", "Phim bộ", "Phim hoạt hình", "TV Shows"
-- Hover card hiện tên + năm + thể loại
+---
 
-### 2. Trang chi tiết phim (`/phim/:slug`)
-- Backdrop + poster + tiêu đề, mô tả, năm, thời lượng, thể loại, quốc gia, diễn viên, đạo diễn
-- Nút "Xem ngay" + "Thêm vào yêu thích"
-- Danh sách tập (cho phim bộ) chia theo server
-- Khu vực bình luận & đánh giá sao (1-5)
+### 2. Tua ±5 giây
 
-### 3. Trang xem phim (`/xem/:slug/:episode`)
-- Video player HLS (hls.js) full-width, hỗ trợ chuyển tập, chuyển server
-- Bên dưới: thông tin phim + bình luận
+`src/components/HlsPlayer.tsx`:
+- Overlay 2 nút bo tròn (`Rewind 5s` / `Forward 5s`) hai bên nút play, icon `RotateCcw` / `RotateCw` từ lucide.
+- Bind phím tắt: `←` lùi 5s, `→` tới 5s, `Space` play/pause.
+- Double-tap trái/phải trên mobile để tua.
 
-### 4. Tìm kiếm & lọc (`/tim-kiem`, `/the-loai/:slug`, `/quoc-gia/:slug`)
-- Ô search ở header
-- Trang kết quả với grid phim, lọc theo thể loại / quốc gia / năm / loại phim, phân trang
+---
 
-### 5. Tài khoản
-- Đăng nhập / đăng ký (email + mật khẩu, Google)
-- Trang "Yêu thích" (`/yeu-thich`): danh sách phim đã lưu
-- Trang "Lịch sử xem" (`/lich-su`): các phim/tập đã xem gần đây
-- Trang cài đặt (`/cai-dat`): đổi theme (dark/light/system), đổi tên hiển thị, đăng xuất
+### 3. Phòng xem chung (Watch Party)
 
-### 6. Header / Navigation
-- Logo, menu (Trang chủ, Phim lẻ, Phim bộ, Hoạt hình, Thể loại dropdown), search, avatar dropdown
-- Toggle theme nhanh
+**Database (migration mới):**
+- `watch_rooms`: `id`, `room_code` (text unique 6 ký tự), `password_hash` (text), `host_id` (uuid), `movie_slug`, `episode_slug`, `created_at`, `max_users` (int default 40).
+- `room_participants`: `id`, `room_id` (fk), `user_id`, `display_name`, `joined_at`, `mic_enabled` (bool), `mic_muted` (bool).
+- `room_messages`: `id`, `room_id`, `user_id`, `display_name`, `content`, `created_at`.
+- RLS: chỉ thành viên trong phòng mới insert/select message + participant.
+- Bật **realtime** cho `room_participants`, `room_messages` (broadcast video state cũng dùng channel).
+- Edge function `verify-room` để hash + so password (bcrypt) khi join.
 
-## Thiết kế (Netflix-style)
-- Mặc định **dark mode**, có light mode trong cài đặt
-- Màu chính: nền đen #0a0a0a, accent đỏ Netflix-like (HSL ~ 0 84% 50%), text trắng/xám
-- Font sans hiện đại (Inter)
-- Card phim bo nhẹ, hover scale + glow đỏ
-- Hàng phim cuộn ngang mượt với mũi tên trái/phải
-- Skeleton loading cho data
-- Responsive đầy đủ: mobile (1 cột), tablet (3-4), desktop (6+)
+**UI:**
+- Trên `Watch.tsx` thêm nút "Xem chung" → mở dialog: tạo phòng (sinh code 6 ký tự + password) hoặc nhập `room_code` + password để vào.
+- Trang `/phong/:code`:
+  - Cột trái: video player đồng bộ (host phát play/pause/seek qua Supabase channel `broadcast`, các client lắng nghe và `seekTo`).
+  - Cột phải: danh sách người (≤40 + counter), khung chat realtime, các nút mic: bật mic, tắt mic, mute người khác.
+- Voice dùng **WebRTC peer-to-peer mesh** (đủ cho 8-10 người ổn định; >10 sẽ cảnh báo độ trễ) với signaling qua Supabase Realtime channel. Không dùng SFU (chi phí). Lưu ý người dùng giới hạn voice thực tế ~10 người, chat vẫn 40.
 
-## Backend (Lovable Cloud)
+---
 
-### Auth
-- Email/password + Google sign-in
-- Auto-confirm email bật để test nhanh
+### 4. Tab Vietsub / Thuyết minh / Lồng tiếng
 
-### Database tables
-- `profiles` (id, display_name, avatar_url, theme_preference, created_at) — auto-create trigger
-- `favorites` (id, user_id, movie_slug, movie_name, poster_url, created_at)
-- `watch_history` (id, user_id, movie_slug, episode_slug, movie_name, poster_url, watched_at)
-- `comments` (id, user_id, movie_slug, content, rating, created_at)
-- RLS: user chỉ đọc/sửa của mình; comments mọi người đọc được, chỉ chủ sở hữu sửa/xoá
+`src/components/MovieRow.tsx` hoặc khu vực hiển thị tab ngôn ngữ trên `Index.tsx`:
+- Tăng kích thước tab: padding `px-6 py-3`, font `text-base font-semibold`.
+- Thêm thumbnail poster (fetch 1 phim đại diện mỗi tab) hiển thị bên cạnh chữ — ảnh nhỏ 40x56 bo góc.
+- Tab active có viền primary + glow.
 
-## Phạm vi triển khai theo bước
-Phạm vi lớn — sẽ làm theo các giai đoạn để kiểm soát chất lượng:
+---
 
-**Giai đoạn 1 (lần này):**
-- Setup design system Netflix dark/light
-- Tích hợp KKPhim API (fetch helper)
-- Header + trang chủ với các hàng phim cuộn ngang + hero carousel
-- Trang chi tiết phim
-- Trang xem phim với HLS player
-- Tìm kiếm cơ bản
+### 5. Diễn viên dạng avatar tròn
 
-**Giai đoạn 2 (yêu cầu sau):**
-- Bật Lovable Cloud, setup auth (email + Google) + bảng dữ liệu
-- Trang đăng nhập/đăng ký, profile dropdown
-- Yêu thích, lịch sử xem
-- Bình luận & đánh giá
-- Trang cài đặt + theme toggle persist
+`src/pages/MovieDetail.tsx`:
+- Sau phần "Nội dung", thêm section "Diễn viên".
+- Render `m.actor` thành hàng cuộn ngang, mỗi item: avatar tròn 80x80 + tên ở dưới.
+- API KKPhim không trả ảnh diễn viên → dùng dịch vụ ảnh fallback: gọi TMDB search person (free, no key cần) hoặc fallback initials avatar (chữ cái đầu trên nền gradient) nếu không có ảnh. Mặc định dùng **initials avatar** (đảm bảo luôn hiển thị, không phụ thuộc external API). Nếu user muốn ảnh thật sẽ thêm TMDB sau.
 
-## Chi tiết kỹ thuật
-- React Router cho routing đa trang
-- TanStack Query cho cache API phim
-- `hls.js` cho streaming m3u8
-- `next-themes`-like custom provider qua class `dark` trên `<html>`
-- API base: `https://phimapi.com/danh-sach/phim-moi-cap-nhat-v3`, `https://phimapi.com/phim/{slug}`, `https://phimapi.com/v1/api/tim-kiem`
-- Tất cả màu qua CSS variables HSL trong `index.css` + `tailwind.config.ts`
+---
+
+### Files sẽ tạo/sửa
+
+**Tạo mới:**
+- `supabase/migrations/...watch_rooms.sql`
+- `supabase/functions/verify-room/index.ts`
+- `src/pages/WatchParty.tsx`
+- `src/components/CreateRoomDialog.tsx`
+- `src/components/ActorAvatars.tsx`
+
+**Sửa:**
+- `src/components/Header.tsx` (menu quốc gia)
+- `src/components/HlsPlayer.tsx` (±5s)
+- `src/components/MovieRow.tsx` hoặc tab ngôn ngữ trên `Index.tsx` (tab to hơn + poster)
+- `src/pages/MovieDetail.tsx` (avatars + nút xem chung)
+- `src/pages/Watch.tsx` (nút xem chung)
+- `src/App.tsx` (route `/phong/:code`)
+
+---
+
+### Câu hỏi cần xác nhận trước khi build
+
+- Voice chat: chấp nhận giới hạn thực tế ~10 người do dùng WebRTC mesh (không tốn server)? Hay muốn bắt buộc 40 người voice (cần tích hợp dịch vụ SFU như LiveKit, có chi phí)?
+- Ảnh diễn viên: dùng initials avatar (gradient + chữ cái) hay tích hợp TMDB lấy ảnh thật?

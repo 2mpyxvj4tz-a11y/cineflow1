@@ -199,6 +199,79 @@ export type Database = {
         }
         Relationships: []
       }
+      room_messages: {
+        Row: {
+          content: string
+          created_at: string
+          display_name: string
+          id: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_name: string
+          id?: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "watch_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_participants: {
+        Row: {
+          display_name: string
+          id: string
+          joined_at: string
+          mic_enabled: boolean
+          mic_muted: boolean
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          display_name: string
+          id?: string
+          joined_at?: string
+          mic_enabled?: boolean
+          mic_muted?: boolean
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          display_name?: string
+          id?: string
+          joined_at?: string
+          mic_enabled?: boolean
+          mic_muted?: boolean
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_participants_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "watch_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sync_logs: {
         Row: {
           episodes_added: number | null
@@ -256,6 +329,45 @@ export type Database = {
           poster_url?: string | null
           user_id?: string
           watched_at?: string
+        }
+        Relationships: []
+      }
+      watch_rooms: {
+        Row: {
+          created_at: string
+          episode_slug: string | null
+          host_id: string
+          id: string
+          max_users: number
+          movie_name: string | null
+          movie_slug: string
+          password_hash: string
+          poster_url: string | null
+          room_code: string
+        }
+        Insert: {
+          created_at?: string
+          episode_slug?: string | null
+          host_id: string
+          id?: string
+          max_users?: number
+          movie_name?: string | null
+          movie_slug: string
+          password_hash: string
+          poster_url?: string | null
+          room_code: string
+        }
+        Update: {
+          created_at?: string
+          episode_slug?: string | null
+          host_id?: string
+          id?: string
+          max_users?: number
+          movie_name?: string | null
+          movie_slug?: string
+          password_hash?: string
+          poster_url?: string | null
+          room_code?: string
         }
         Relationships: []
       }
