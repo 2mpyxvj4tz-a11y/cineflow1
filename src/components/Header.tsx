@@ -227,6 +227,21 @@ export function Header() {
                 ))}
               </div>
             </details>
+            <details className="px-1">
+              <summary className="cursor-pointer rounded px-3 py-2 text-sm text-foreground/80">Quốc gia</summary>
+              <div className="grid grid-cols-2 gap-1 p-2">
+                {countries.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/quoc-gia/${c.slug}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded px-2 py-1 text-xs text-foreground/70 hover:bg-accent"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </details>
           </nav>
         </div>
       )}
