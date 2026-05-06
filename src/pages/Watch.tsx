@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Comments } from "@/components/Comments";
+import { WatchPartyDialog } from "@/components/WatchPartyDialog";
 
 export default function Watch() {
   const { slug = "", episode = "" } = useParams();
@@ -81,6 +82,12 @@ export default function Watch() {
               Tập sau <ChevronRight className="h-4 w-4" />
             </Link>
           )}
+          <WatchPartyDialog
+            movieSlug={m.slug}
+            movieName={m.name}
+            posterUrl={fixImg(m.poster_url || m.thumb_url)}
+            episodeSlug={currentEp.slug}
+          />
         </div>
 
         {episodes.length > 1 && (

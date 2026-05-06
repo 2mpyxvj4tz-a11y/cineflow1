@@ -17,6 +17,7 @@ import Favorites from "./pages/Favorites.tsx";
 import History from "./pages/History.tsx";
 import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import WatchParty from "./pages/WatchParty.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: 1 } },
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/yeu-thich" element={<Favorites />} />
                 <Route path="/lich-su" element={<History />} />
                 <Route path="/cai-dat" element={<Settings />} />
+                <Route path="/phong/:code" element={<WatchParty />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Comments } from "@/components/Comments";
 import { SEO } from "@/components/SEO";
+import { ActorAvatars } from "@/components/ActorAvatars";
+import { WatchPartyDialog } from "@/components/WatchPartyDialog";
 
 export default function MovieDetail() {
   const { slug = "" } = useParams();
@@ -92,7 +94,14 @@ export default function MovieDetail() {
                 </Link>
               )}
               <FavoriteButton movieSlug={m.slug} movieName={m.name} posterUrl={fixImg(m.poster_url || m.thumb_url)} />
-
+              {firstEp && (
+                <WatchPartyDialog
+                  movieSlug={m.slug}
+                  movieName={m.name}
+                  posterUrl={fixImg(m.poster_url || m.thumb_url)}
+                  episodeSlug={episodes[0].server_data[0].slug}
+                />
+              )}
             </div>
 
             <div className="mt-6 grid gap-2 text-sm">
@@ -138,6 +147,8 @@ export default function MovieDetail() {
             )}
           </div>
         </div>
+
+        <ActorAvatars actors={m.actor ?? []} />
 
         {episodes.length > 0 && (
           <section className="mt-10">

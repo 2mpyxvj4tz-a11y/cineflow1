@@ -4,7 +4,7 @@ import { Search, Menu, X, Moon, Sun, Heart, History as HistoryIcon, Settings as 
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "./AuthProvider";
 import { useQuery } from "@tanstack/react-query";
-import { fetchCategories } from "@/lib/phim-api";
+import { fetchCategories, fetchCountries } from "@/lib/phim-api";
 
 const NAV = [
   { to: "/", label: "Trang chủ" },
@@ -20,12 +20,14 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [genreOpen, setGenreOpen] = useState(false);
+  const [countryOpen, setCountryOpen] = useState(false);
   const navigate = useNavigate();
   const { resolved, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [userMenu, setUserMenu] = useState(false);
 
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories, staleTime: 1000 * 60 * 60 });
+  const { data: countries = [] } = useQuery({ queryKey: ["countries"], queryFn: fetchCountries, staleTime: 1000 * 60 * 60 });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -90,6 +92,29 @@ export function Header() {
                     key={c.slug}
                     to={`/the-loai/${c.slug}`}
                     onClick={() => setGenreOpen(false)}
+                    className="rounded px-2 py-1.5 text-sm text-popover-foreground/80 hover:bg-accent hover:text-foreground"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="relative" onMouseLeave={() => setCountryOpen(false)}>
+            <button
+              onMouseEnter={() => setCountryOpen(true)}
+              onClick={() => setCountryOpen((v) => !v)}
+              className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-foreground rounded-md"
+            >
+              Quốc gia
+            </button>
+            {countryOpen && (
+              <div className="absolute left-0 top-full mt-1 grid w-[520px] grid-cols-3 gap-1 rounded-md border border-border bg-popover p-3 shadow-xl">
+                {countries.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/quoc-gia/${c.slug}`}
+                    onClick={() => setCountryOpen(false)}
                     className="rounded px-2 py-1.5 text-sm text-popover-foreground/80 hover:bg-accent hover:text-foreground"
                   >
                     {c.name}
@@ -194,6 +219,21 @@ export function Header() {
                   <Link
                     key={c.slug}
                     to={`/the-loai/${c.slug}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded px-2 py-1 text-xs text-foreground/70 hover:bg-accent"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </details>
+            <details className="px-1">
+              <summary className="cursor-pointer rounded px-3 py-2 text-sm text-foreground/80">Quốc gia</summary>
+              <div className="grid grid-cols-2 gap-1 p-2">
+                {countries.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/quoc-gia/${c.slug}`}
                     onClick={() => setMobileOpen(false)}
                     className="rounded px-2 py-1 text-xs text-foreground/70 hover:bg-accent"
                   >

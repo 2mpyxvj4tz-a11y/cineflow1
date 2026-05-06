@@ -1,16 +1,16 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { searchMovies } from "@/lib/phim-api";
+import { searchMovies, fetchListByType, fixImg } from "@/lib/phim-api";
 import { MovieGrid } from "@/components/MovieGrid";
 import { Pagination } from "@/components/Pagination";
 import { SEO } from "@/components/SEO";
 import { X } from "lucide-react";
 
 const LANG_OPTIONS = [
-  { value: "vietsub", label: "Vietsub" },
-  { value: "long-tieng", label: "Lồng tiếng" },
-  { value: "thuyet-minh", label: "Thuyết minh" },
+  { value: "vietsub", label: "Vietsub", listType: "phim-vietsub" as const },
+  { value: "long-tieng", label: "Lồng tiếng", listType: "phim-long-tieng" as const },
+  { value: "thuyet-minh", label: "Thuyết minh", listType: "phim-thuyet-minh" as const },
 ];
 
 const QUALITY_OPTIONS = [
@@ -85,28 +85,25 @@ export default function SearchPage() {
       </h1>
 
       {q && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
-          <FilterGroup
-            label="Phụ đề"
-            options={LANG_OPTIONS}
-            value={langFilter}
-            onChange={(v) => updateParam("lang", v)}
-          />
-          <div className="hidden h-6 w-px bg-border md:block" />
-          <FilterGroup
-            label="Chất lượng"
-            options={QUALITY_OPTIONS}
-            value={qualityFilter}
-            onChange={(v) => updateParam("quality", v)}
-          />
-          {hasFilters && (
-            <button
-              onClick={() => { const n = new URLSearchParams(); if (q) n.set("q", q); setParams(n); }}
-              className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent"
-            >
-              <X className="h-3.5 w-3.5" /> Xoá lọc
-            </button>
-          )}
+        <div className="mb-6 space-y-4 rounded-lg border border-border bg-card p-4">
+          <LangPosterFilter value={langFilter} onChange={(v) => updateParam("lang", v)} />
+          <div className="h-px w-full bg-border" />
+          <div className="flex flex-wrap items-center gap-3">
+            <FilterGroup
+              label="Chất lượng"
+              options={QUALITY_OPTIONS}
+              value={qualityFilter}
+              onChange={(v) => updateParam("quality", v)}
+            />
+            {hasFilters && (
+              <button
+                onClick={() => { const n = new URLSearchParams(); if (q) n.set("q", q); setParams(n); }}
+                className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent"
+              >
+                <X className="h-3.5 w-3.5" /> Xoá lọc
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -157,6 +154,55 @@ function FilterGroup({ label, options, value, onChange }: FilterGroupProps) {
           </button>
         );
       })}
+    </div>
+  );
+}
+
+function LangPosterFilter({ value, onChange }: { value: string; onChange: (v: string | null) => void }) {
+  const queries = LANG_OPTIONS.map((opt) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useQuery({
+      queryKey: ["lang-poster", opt.listType],
+      queryFn: () => fetchListByType(opt.listType, 1),
+      staleTime: 1000 * 60 * 30,
+    })
+  );
+
+  return (
+    <div className="space-y-2">
+      <span className="text-sm font-semibold text-muted-foreground">Phụ đề / Lồng tiếng:</span>
+      <div className="flex flex-wrap gap-3">
+        {LANG_OPTIONS.map((opt, i) => {
+          const active = value === opt.value;
+          const poster = queries[i].data?.data.items?.[0];
+          const posterUrl = poster ? fixImg(poster.poster_url || poster.thumb_url) : "";
+          return (
+            <button
+              key={opt.value}
+              onClick={() => onChange(active ? null : opt.value)}
+              className={`group flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all ${
+                active
+                  ? "border-primary bg-primary/10 shadow-[0_0_20px_-4px_hsl(var(--primary)/0.5)]"
+                  : "border-border bg-background hover:border-primary/60"
+              }`}
+            >
+              <div className="h-14 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
+                {posterUrl && (
+                  <img
+                    src={posterUrl}
+                    alt={opt.label}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                    loading="lazy"
+                  />
+                )}
+              </div>
+              <span className={`text-base font-semibold ${active ? "text-primary" : "text-foreground"}`}>
+                {opt.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
