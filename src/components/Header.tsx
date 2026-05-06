@@ -4,7 +4,7 @@ import { Search, Menu, X, Moon, Sun, Heart, History as HistoryIcon, Settings as 
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "./AuthProvider";
 import { useQuery } from "@tanstack/react-query";
-import { fetchCategories } from "@/lib/phim-api";
+import { fetchCategories, fetchCountries } from "@/lib/phim-api";
 
 const NAV = [
   { to: "/", label: "Trang chủ" },
