@@ -44,6 +44,7 @@ const App = () => (
                 <Route path="/yeu-thich" element={<Favorites />} />
                 <Route path="/lich-su" element={<History />} />
                 <Route path="/cai-dat" element={<Settings />} />
+                <Route path="/phong/:code" element={<WatchParty />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
