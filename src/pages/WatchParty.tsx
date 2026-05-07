@@ -322,6 +322,12 @@ export default function WatchParty() {
             Mã phòng: <span className="font-mono font-bold text-primary">{room.room_code}</span> · {participants.length}/{room.max_users} người · {isHost ? "Bạn là chủ phòng" : "Bạn là khách"}
           </p>
         </div>
+        <button
+          onClick={copyInvite}
+          className="inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-semibold hover:bg-accent"
+        >
+          <Users className="h-4 w-4" /> Copy lời mời
+        </button>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
