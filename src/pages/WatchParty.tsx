@@ -361,6 +361,26 @@ export default function WatchParty() {
               {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               {muted ? "Bật âm" : "Tắt âm tất cả"}
             </button>
+
+            {isHost && (
+              <>
+                <div className="mx-2 h-6 w-px bg-border" />
+                <button
+                  onClick={hostMuteAll}
+                  className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20"
+                  title="Tắt/bật âm cho toàn bộ thành viên"
+                >
+                  <VolumeX className="h-4 w-4" /> Mute cả phòng
+                </button>
+                <button
+                  onClick={hostForceMicOffAll}
+                  className="inline-flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/20"
+                  title="Buộc tắt mic của mọi người"
+                >
+                  <MicOff className="h-4 w-4" /> Tắt mic mọi người
+                </button>
+              </>
+            )}
           </div>
         </div>
 
