@@ -138,6 +138,27 @@ export default function WatchParty() {
       if (pc && payload.candidate) await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
     });
 
+    // Host moderation
+    ch.on("broadcast", { event: "host-force-mic-off" }, () => {
+      if (user.id === room.host_id) return;
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+        peersRef.current.forEach((pc) => pc.close());
+        peersRef.current.clear();
+        setMicOn(false);
+        supabase.from("room_participants").update({ mic_enabled: false }).eq("room_id", room.id).eq("user_id", user.id);
+        toast.info("Chủ phòng đã tắt mic của bạn");
+      }
+    });
+    ch.on("broadcast", { event: "host-mute-all" }, ({ payload }) => {
+      if (user.id === room.host_id) return;
+      const next = !!payload?.muted;
+      setMuted(next);
+      audioElsRef.current.forEach((a) => (a.muted = next));
+      toast.info(next ? "Chủ phòng đã tắt âm phòng" : "Chủ phòng đã bật âm phòng");
+    });
+
     ch.subscribe(async (status) => {
       if (status === "SUBSCRIBED") {
         // Initial loads
