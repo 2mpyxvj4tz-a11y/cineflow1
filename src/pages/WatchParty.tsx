@@ -138,6 +138,27 @@ export default function WatchParty() {
       if (pc && payload.candidate) await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
     });
 
+    // Host moderation
+    ch.on("broadcast", { event: "host-force-mic-off" }, () => {
+      if (user.id === room.host_id) return;
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+        peersRef.current.forEach((pc) => pc.close());
+        peersRef.current.clear();
+        setMicOn(false);
+        supabase.from("room_participants").update({ mic_enabled: false }).eq("room_id", room.id).eq("user_id", user.id);
+        toast.info("Chủ phòng đã tắt mic của bạn");
+      }
+    });
+    ch.on("broadcast", { event: "host-mute-all" }, ({ payload }) => {
+      if (user.id === room.host_id) return;
+      const next = !!payload?.muted;
+      setMuted(next);
+      audioElsRef.current.forEach((a) => (a.muted = next));
+      toast.info(next ? "Chủ phòng đã tắt âm phòng" : "Chủ phòng đã bật âm phòng");
+    });
+
     ch.subscribe(async (status) => {
       if (status === "SUBSCRIBED") {
         // Initial loads
@@ -252,6 +273,33 @@ export default function WatchParty() {
     channelRef.current?.send({ type: "broadcast", event: "video-sync", payload: state });
   };
 
+  const hostForceMicOffAll = () => {
+    if (!room || user?.id !== room.host_id) return;
+    channelRef.current?.send({ type: "broadcast", event: "host-force-mic-off", payload: {} });
+    toast.success("Đã tắt mic toàn bộ thành viên");
+  };
+
+  const hostMuteAll = () => {
+    if (!room || user?.id !== room.host_id) return;
+    const next = !muted;
+    setMuted(next);
+    audioElsRef.current.forEach((a) => (a.muted = next));
+    channelRef.current?.send({ type: "broadcast", event: "host-mute-all", payload: { muted: next } });
+    toast.success(next ? "Đã tắt âm cho cả phòng" : "Đã bật lại âm cho cả phòng");
+  };
+
+  const copyInvite = async () => {
+    if (!room) return;
+    const pw = sessionStorage.getItem(`room-pw-${room.room_code}`) || "";
+    const text = `Cùng xem "${room.movie_name}" trên CineFlow nhé!\nMã phòng: ${room.room_code}${pw ? `\nMật khẩu: ${pw}` : ""}\nLink: ${window.location.origin}/phong/${room.room_code}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Đã copy lời mời, gửi cho bạn bè ngay!");
+    } catch {
+      toast.error("Không thể copy");
+    }
+  };
+
   if (!room || !authorized) {
     return <div className="flex h-[60vh] items-center justify-center">Đang vào phòng...</div>;
   }
@@ -274,6 +322,12 @@ export default function WatchParty() {
             Mã phòng: <span className="font-mono font-bold text-primary">{room.room_code}</span> · {participants.length}/{room.max_users} người · {isHost ? "Bạn là chủ phòng" : "Bạn là khách"}
           </p>
         </div>
+        <button
+          onClick={copyInvite}
+          className="inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-semibold hover:bg-accent"
+        >
+          <Users className="h-4 w-4" /> Copy lời mời
+        </button>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
@@ -307,6 +361,26 @@ export default function WatchParty() {
               {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               {muted ? "Bật âm" : "Tắt âm tất cả"}
             </button>
+
+            {isHost && (
+              <>
+                <div className="mx-2 h-6 w-px bg-border" />
+                <button
+                  onClick={hostMuteAll}
+                  className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20"
+                  title="Tắt/bật âm cho toàn bộ thành viên"
+                >
+                  <VolumeX className="h-4 w-4" /> Mute cả phòng
+                </button>
+                <button
+                  onClick={hostForceMicOffAll}
+                  className="inline-flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/20"
+                  title="Buộc tắt mic của mọi người"
+                >
+                  <MicOff className="h-4 w-4" /> Tắt mic mọi người
+                </button>
+              </>
+            )}
           </div>
         </div>
 

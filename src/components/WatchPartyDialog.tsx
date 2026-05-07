@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Plus, LogIn } from "lucide-react";
+import { Users, Plus, LogIn, Copy, Check } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -25,9 +25,11 @@ export function WatchPartyDialog({ movieSlug, movieName, posterUrl, episodeSlug 
   const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"choose" | "create" | "join">("choose");
+  const [mode, setMode] = useState<"choose" | "create" | "join" | "created">("choose");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
+  const [createdCode, setCreatedCode] = useState("");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const requireAuth = () => {
@@ -38,6 +40,20 @@ export function WatchPartyDialog({ movieSlug, movieName, posterUrl, episodeSlug 
     }
     return true;
   };
+
+  const copy = async (text: string, field: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      toast.success("Đã copy!");
+      setTimeout(() => setCopiedField(null), 1500);
+    } catch {
+      toast.error("Không thể copy");
+    }
+  };
+
+  const inviteText = () =>
+    `Cùng xem "${movieName}" trên CineFlow nhé!\nMã phòng: ${createdCode}\nMật khẩu: ${password}\nLink: ${window.location.origin}/phong/${createdCode}`;
 
   const onCreate = async () => {
     if (!requireAuth()) return;
@@ -57,8 +73,8 @@ export function WatchPartyDialog({ movieSlug, movieName, posterUrl, episodeSlug 
     setBusy(false);
     if (error) return toast.error("Tạo phòng thất bại: " + error.message);
     sessionStorage.setItem(`room-pw-${room_code}`, password);
-    setOpen(false);
-    navigate(`/phong/${room_code}`);
+    setCreatedCode(room_code);
+    setMode("created");
   };
 
   const onJoin = async () => {
@@ -85,6 +101,14 @@ export function WatchPartyDialog({ movieSlug, movieName, posterUrl, episodeSlug 
     navigate(`/phong/${codeUp}`);
   };
 
+  const close = () => {
+    setOpen(false);
+    setMode("choose");
+    setPassword("");
+    setCode("");
+    setCreatedCode("");
+  };
+
   return (
     <>
       <button
@@ -95,7 +119,7 @@ export function WatchPartyDialog({ movieSlug, movieName, posterUrl, episodeSlug 
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={close}>
           <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="mb-4 text-xl font-bold">Phòng xem chung</h3>
 
@@ -135,6 +159,77 @@ export function WatchPartyDialog({ movieSlug, movieName, posterUrl, episodeSlug 
                     {busy ? "Đang tạo..." : "Tạo phòng"}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {mode === "created" && (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  🎉 Phòng đã sẵn sàng! Chia sẻ <strong>mã phòng</strong> và <strong>mật khẩu</strong> cho bạn bè để cùng xem (tối đa 40 người).
+                </p>
+
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground">Mã phòng</label>
+                  <div className="mt-1 flex gap-2">
+                    <input
+                      readOnly
+                      value={createdCode}
+                      className="flex-1 rounded-md border border-border bg-background px-3 py-2 font-mono text-lg font-bold tracking-widest"
+                    />
+                    <button
+                      onClick={() => copy(createdCode, "code")}
+                      className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"
+                    >
+                      {copiedField === "code" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground">Mật khẩu</label>
+                  <div className="mt-1 flex gap-2">
+                    <input
+                      readOnly
+                      value={password}
+                      className="flex-1 rounded-md border border-border bg-background px-3 py-2"
+                    />
+                    <button
+                      onClick={() => copy(password, "pw")}
+                      className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-2 text-sm font-semibold"
+                    >
+                      {copiedField === "pw" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => copy(inviteText(), "invite")}
+                  className="flex w-full items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-semibold hover:bg-accent"
+                >
+                  {copiedField === "invite" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  Copy lời mời (mã + mật khẩu + link)
+                </button>
+
+                <div className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
+                  💡 <strong>Cách mời bạn bè:</strong>
+                  <ul className="mt-1 list-disc pl-4 space-y-0.5">
+                    <li>Bấm "Copy lời mời" rồi gửi qua Messenger / Zalo / Discord.</li>
+                    <li>Hoặc gửi link <span className="font-mono">/phong/{createdCode}</span> + mật khẩu riêng.</li>
+                    <li>Bạn bè vào CineFlow → bấm "Xem chung" → "Vào phòng" → nhập mã + mật khẩu.</li>
+                  </ul>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    navigate(`/phong/${createdCode}`);
+                  }}
+                  className="w-full rounded-md bg-primary px-3 py-2 font-semibold text-primary-foreground"
+                >
+                  Vào phòng ngay
+                </button>
               </div>
             )}
 
