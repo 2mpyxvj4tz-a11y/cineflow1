@@ -273,6 +273,33 @@ export default function WatchParty() {
     channelRef.current?.send({ type: "broadcast", event: "video-sync", payload: state });
   };
 
+  const hostForceMicOffAll = () => {
+    if (!room || user?.id !== room.host_id) return;
+    channelRef.current?.send({ type: "broadcast", event: "host-force-mic-off", payload: {} });
+    toast.success("Đã tắt mic toàn bộ thành viên");
+  };
+
+  const hostMuteAll = () => {
+    if (!room || user?.id !== room.host_id) return;
+    const next = !muted;
+    setMuted(next);
+    audioElsRef.current.forEach((a) => (a.muted = next));
+    channelRef.current?.send({ type: "broadcast", event: "host-mute-all", payload: { muted: next } });
+    toast.success(next ? "Đã tắt âm cho cả phòng" : "Đã bật lại âm cho cả phòng");
+  };
+
+  const copyInvite = async () => {
+    if (!room) return;
+    const pw = sessionStorage.getItem(`room-pw-${room.room_code}`) || "";
+    const text = `Cùng xem "${room.movie_name}" trên CineFlow nhé!\nMã phòng: ${room.room_code}${pw ? `\nMật khẩu: ${pw}` : ""}\nLink: ${window.location.origin}/phong/${room.room_code}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Đã copy lời mời, gửi cho bạn bè ngay!");
+    } catch {
+      toast.error("Không thể copy");
+    }
+  };
+
   if (!room || !authorized) {
     return <div className="flex h-[60vh] items-center justify-center">Đang vào phòng...</div>;
   }
