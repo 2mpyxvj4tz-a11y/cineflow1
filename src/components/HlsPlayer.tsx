@@ -5,6 +5,8 @@ import { Settings, RotateCcw, RotateCw } from "lucide-react";
 interface Props {
   src: string;
   poster?: string;
+  /** Ngưỡng độ phân giải tối thiểu mong muốn (vd 1080, 2160). Player sẽ chọn level thấp nhất ≥ ngưỡng, nếu không có thì rơi về cao nhất. */
+  preferredMinHeight?: number;
 }
 
 interface QualityOption {
