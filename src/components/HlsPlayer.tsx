@@ -5,6 +5,8 @@ import { Settings, RotateCcw, RotateCw } from "lucide-react";
 interface Props {
   src: string;
   poster?: string;
+  /** Ngưỡng độ phân giải tối thiểu mong muốn (vd 1080, 2160). Player sẽ chọn level thấp nhất ≥ ngưỡng, nếu không có thì rơi về cao nhất. */
+  preferredMinHeight?: number;
 }
 
 interface QualityOption {
@@ -22,12 +24,13 @@ function labelForHeight(h: number): string {
   return `${h}p`;
 }
 
-export function HlsPlayer({ src, poster }: Props) {
+export function HlsPlayer({ src, poster, preferredMinHeight = 1080 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [levels, setLevels] = useState<QualityOption[]>([]);
   const [currentLevel, setCurrentLevel] = useState<number>(-1);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [autoBadge, setAutoBadge] = useState<string>("");
 
   useEffect(() => {
     const video = ref.current;
@@ -56,11 +59,19 @@ export function HlsPlayer({ src, poster }: Props) {
         const opts: QualityOption[] = (data.levels as Level[])
           .map((lv, i) => ({ label: labelForHeight(lv.height || 0), index: i, height: lv.height }))
           .sort((a, b) => (b.height || 0) - (a.height || 0));
-        // chọn mức cao nhất theo mặc định
-        const top = opts[0];
-        if (top && hls) {
-          hls.currentLevel = top.index;
-          setCurrentLevel(top.index);
+        // Ưu tiên: level thấp nhất ≥ preferredMinHeight; nếu không có → cao nhất hiện có.
+        const meets = opts.filter((o) => (o.height || 0) >= preferredMinHeight);
+        const chosen = meets.length ? meets[meets.length - 1] : opts[0];
+        if (chosen && hls) {
+          hls.currentLevel = chosen.index;
+          setCurrentLevel(chosen.index);
+          const wantLabel = preferredMinHeight >= 2160 ? "4K" : preferredMinHeight >= 1080 ? "1080p" : `${preferredMinHeight}p`;
+          if (meets.length) {
+            setAutoBadge(`Đang phát ${chosen.label} (mục tiêu ${wantLabel})`);
+          } else {
+            setAutoBadge(`Nguồn không có ${wantLabel} — phát ${chosen.label} (cao nhất)`);
+          }
+          setTimeout(() => setAutoBadge(""), 4000);
         }
         setLevels([{ label: "Tự động", index: -1 }, ...opts]);
       });
@@ -146,6 +157,11 @@ export function HlsPlayer({ src, poster }: Props) {
           <RotateCw className="h-6 w-6" />
         </button>
       </div>
+      {autoBadge && (
+        <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-primary/90 px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg backdrop-blur animate-in fade-in slide-in-from-top-2">
+          {autoBadge}
+        </div>
+      )}
       {levels.length > 1 && (
         <div className="absolute right-3 top-3 z-10">
           <button
