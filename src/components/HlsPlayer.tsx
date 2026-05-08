@@ -24,12 +24,13 @@ function labelForHeight(h: number): string {
   return `${h}p`;
 }
 
-export function HlsPlayer({ src, poster }: Props) {
+export function HlsPlayer({ src, poster, preferredMinHeight = 1080 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [levels, setLevels] = useState<QualityOption[]>([]);
   const [currentLevel, setCurrentLevel] = useState<number>(-1);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [autoBadge, setAutoBadge] = useState<string>("");
 
   useEffect(() => {
     const video = ref.current;
