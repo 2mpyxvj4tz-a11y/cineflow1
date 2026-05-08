@@ -157,6 +157,11 @@ export function HlsPlayer({ src, poster, preferredMinHeight = 1080 }: Props) {
           <RotateCw className="h-6 w-6" />
         </button>
       </div>
+      {autoBadge && (
+        <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-primary/90 px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg backdrop-blur animate-in fade-in slide-in-from-top-2">
+          {autoBadge}
+        </div>
+      )}
       {levels.length > 1 && (
         <div className="absolute right-3 top-3 z-10">
           <button
