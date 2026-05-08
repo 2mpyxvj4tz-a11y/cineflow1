@@ -50,11 +50,24 @@ export default function Watch() {
     return <div className="aspect-video w-full animate-pulse bg-muted" />;
   }
 
+  // Tự xác định ngưỡng chất lượng mong muốn theo thể loại
+  // - Phim đồ họa cao (Hành Động, Khoa Học, Viễn Tưởng, Hoạt Hình, Phiêu Lưu, Chiến Tranh) → ưu tiên 4K
+  // - Còn lại → ưu tiên 1080p
+  const HIGH_FX_KEYWORDS = ["hanh-dong", "khoa-hoc", "vien-tuong", "hoat-hinh", "phieu-luu", "chien-tranh"];
+  const HIGH_FX_NAME_HINTS = /avatar|marvel|aven|star wars|dune|transformer|godzilla|kong|jurassic|fast|john wick|spider|batman|superman|matrix|mission impossible/i;
+  const cats = (m?.category ?? []).map((c) => c.slug);
+  const wants4K = cats.some((s) => HIGH_FX_KEYWORDS.includes(s)) || HIGH_FX_NAME_HINTS.test(m?.name || "") || HIGH_FX_NAME_HINTS.test(m?.origin_name || "");
+  const preferredMinHeight = wants4K ? 2160 : 1080;
+
   return (
     <div>
       <div className="bg-black">
         <div className="mx-auto aspect-video max-h-[85vh] w-full max-w-[1600px]">
-          <HlsPlayer src={currentEp.link_m3u8} poster={fixImg(m.thumb_url || m.poster_url)} />
+          <HlsPlayer
+            src={currentEp.link_m3u8}
+            poster={fixImg(m.thumb_url || m.poster_url)}
+            preferredMinHeight={preferredMinHeight}
+          />
         </div>
       </div>
 
