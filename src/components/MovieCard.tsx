@@ -22,14 +22,17 @@ export function MovieCard({ movie, variant = "portrait" }: Props) {
     <Link
       to={to}
       onClick={(e) => openZoom(e, { src: img, to, borderRadius: 6 })}
-      className="group relative block overflow-hidden rounded-md bg-card will-change-transform transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.08] hover:z-20 nf-card-shadow hover:shadow-[0_20px_50px_-12px_hsl(357_92%_47%/0.5)]"
+      className="group relative block overflow-hidden rounded-md bg-card transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.06] hover:z-20 nf-card-shadow hover:shadow-[0_20px_50px_-12px_hsl(357_92%_47%/0.5)] hover:will-change-transform"
     >
       <div className={variant === "landscape" ? "aspect-video" : "aspect-[2/3]"}>
         <img
           src={img}
           alt={movie.name}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110"
+          decoding="async"
+          width={variant === "landscape" ? 320 : 220}
+          height={variant === "landscape" ? 180 : 330}
+          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           onError={(e) => ((e.currentTarget as HTMLImageElement).src = "/placeholder.svg")}
         />
       </div>
