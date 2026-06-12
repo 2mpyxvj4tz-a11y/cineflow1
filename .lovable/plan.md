@@ -1,89 +1,81 @@
-## Mục tiêu
+## Chẩn đoán hiện trạng
 
-Thêm 5 tính năng vào CineFlow:
-1. Menu **Quốc gia** trên header để lọc phim theo nước
-2. Nút **tua ±5 giây** trong trình phát
-3. **Phòng xem chung** (tối đa 40 người) có chat + voice (mic on/off/mute)
-4. Tab chọn **Vietsub / Thuyết minh / Lồng tiếng** to hơn, có poster phim
-5. Hàng **diễn viên** dạng avatar tròn ở dưới mô tả phim
+Mình đã profile trang chủ — đây là số đo:
 
----
+| Chỉ số | Giá trị | Đánh giá |
+|---|---|---|
+| **DOM nodes** | **22.914** | Quá nặng (mục tiêu <5.000) |
+| **Element trên trang** | 6.231 | Nguyên nhân chính gây lag scroll |
+| **Event listeners** | 1.287 | Mỗi card tạo nhiều listener |
+| **FCP (thấy nội dung đầu tiên)** | **4,6s** | Rất chậm (tốt <1,8s) |
+| **DOM Content Loaded** | 4,3s | Chậm |
+| **Task duration** | 7,75s | Main thread bị block lâu |
+| **JS bundle ban đầu** | ~1,3MB / 73 script | Không code-split, tải cả HLS ở trang chủ |
+| **API call song song khi load** | **13 useQuery** | Đều `refetchInterval: 60s` → poll liên tục |
 
-### 1. Menu Quốc gia (Header)
+## Nguyên nhân gốc
 
-`src/components/Header.tsx`:
-- Thêm dropdown "Quốc gia" cạnh "Thể loại", dùng `fetchCountries()` (đã có sẵn trong `phim-api.ts`).
-- Click → điều hướng `/quoc-gia/:slug` (route đã tồn tại trong `App.tsx` → `Category` mode="country").
-- Hiển thị grid 3 cột trên desktop, accordion trên mobile (giống dropdown thể loại hiện tại).
+1. **Render eager 15 hàng × 24 card = 360 card** ngay từ đầu, mỗi card có animation hover `will-change-transform` + gradient + 4-5 phần tử con.
+2. **13 query song song**, mỗi query tự refetch mỗi 60s và khi focus tab → liên tục re-render toàn trang chủ.
+3. **Không code-split route**: `Watch.tsx` kéo theo `hls.js` (229KB) tải kể cả khi đang ở `/`. Cộng với MovieDetail, WatchParty đều nằm trong bundle chính.
+4. **Không preconnect** tới `phimimg.com` / `phimapi.com` → ảnh và API tốn round-trip DNS+TLS.
+5. **`CardZoomProvider`** dùng FLIP animation phức tạp + setTimeout chuyển trang → kéo dài chuyển trang ~520ms.
+6. **`lucide-react` 156KB** — import không tối ưu trên một số file.
 
----
+## Kế hoạch tối ưu (chia 2 nhóm)
 
-### 2. Tua ±5 giây
+### Nhóm A — Quick wins (impact lớn, rủi ro thấp)
 
-`src/components/HlsPlayer.tsx`:
-- Overlay 2 nút bo tròn (`Rewind 5s` / `Forward 5s`) hai bên nút play, icon `RotateCcw` / `RotateCw` từ lucide.
-- Bind phím tắt: `←` lùi 5s, `→` tới 5s, `Space` play/pause.
-- Double-tap trái/phải trên mobile để tua.
+1. **Code-split route bằng `React.lazy` + `Suspense`** trong `src/App.tsx`
+   - Tách `Watch`, `MovieDetail`, `WatchParty`, `MovieList`, `Category`, `Search`, `Favorites`, `History`, `Settings`, `Auth` thành chunk riêng.
+   - Trang chủ sẽ KHÔNG tải `hls.js` nữa → giảm ~230KB bundle khởi đầu.
+   - Kỳ vọng FCP giảm còn ~2s.
 
----
+2. **Giảm tần suất refetch & cache lâu hơn** trong `src/pages/Index.tsx`
+   - Bỏ `refetchInterval: 60_000` (poll mỗi phút × 13 query là dư thừa cho danh sách phim).
+   - Đổi thành: `staleTime: 10 * 60_000`, `refetchOnWindowFocus: false`. Người dùng vẫn được dữ liệu mới khi vào lại sau 10 phút.
+   - Tiết kiệm ~13 request/phút và xoá re-render chu kỳ.
 
-### 3. Phòng xem chung (Watch Party)
+3. **Preconnect tới CDN ảnh & API** trong `index.html`
+   ```html
+   <link rel="preconnect" href="https://phimimg.com" crossorigin>
+   <link rel="preconnect" href="https://phimapi.com" crossorigin>
+   <link rel="dns-prefetch" href="https://phimimg.com">
+   ```
 
-**Database (migration mới):**
-- `watch_rooms`: `id`, `room_code` (text unique 6 ký tự), `password_hash` (text), `host_id` (uuid), `movie_slug`, `episode_slug`, `created_at`, `max_users` (int default 40).
-- `room_participants`: `id`, `room_id` (fk), `user_id`, `display_name`, `joined_at`, `mic_enabled` (bool), `mic_muted` (bool).
-- `room_messages`: `id`, `room_id`, `user_id`, `display_name`, `content`, `created_at`.
-- RLS: chỉ thành viên trong phòng mới insert/select message + participant.
-- Bật **realtime** cho `room_participants`, `room_messages` (broadcast video state cũng dùng channel).
-- Edge function `verify-room` để hash + so password (bcrypt) khi join.
+4. **Bỏ `will-change-transform` mặc định trên `MovieCard`** (`src/components/MovieCard.tsx`)
+   - Chỉ kích hoạt khi hover (`group-hover:will-change-transform`). 360 card cùng bật `will-change` đẩy GPU layer rất nặng.
 
-**UI:**
-- Trên `Watch.tsx` thêm nút "Xem chung" → mở dialog: tạo phòng (sinh code 6 ký tự + password) hoặc nhập `room_code` + password để vào.
-- Trang `/phong/:code`:
-  - Cột trái: video player đồng bộ (host phát play/pause/seek qua Supabase channel `broadcast`, các client lắng nghe và `seekTo`).
-  - Cột phải: danh sách người (≤40 + counter), khung chat realtime, các nút mic: bật mic, tắt mic, mute người khác.
-- Voice dùng **WebRTC peer-to-peer mesh** (đủ cho 8-10 người ổn định; >10 sẽ cảnh báo độ trễ) với signaling qua Supabase Realtime channel. Không dùng SFU (chi phí). Lưu ý người dùng giới hạn voice thực tế ~10 người, chat vẫn 40.
+5. **Thêm `width`/`height` cho `<img>` trong `MovieCard`** để browser không phải tính layout lại từng ảnh.
 
----
+### Nhóm B — Cải tiến cấu trúc (impact rất lớn, cần thay đổi nhiều hơn)
 
-### 4. Tab Vietsub / Thuyết minh / Lồng tiếng
+6. **Lazy-mount các MovieRow ngoài viewport** (`src/components/MovieRow.tsx` + tạo wrapper `LazyRow`)
+   - Dùng `IntersectionObserver`: chỉ render hàng khi gần vào viewport (200px). Trước khi vào viewport chỉ hiển thị skeleton chiều cao cố định.
+   - Kỳ vọng DOM nodes giảm từ ~23k xuống ~3-5k khi load đầu, scroll mượt hẳn.
 
-`src/components/MovieRow.tsx` hoặc khu vực hiển thị tab ngôn ngữ trên `Index.tsx`:
-- Tăng kích thước tab: padding `px-6 py-3`, font `text-base font-semibold`.
-- Thêm thumbnail poster (fetch 1 phim đại diện mỗi tab) hiển thị bên cạnh chữ — ảnh nhỏ 40x56 bo góc.
-- Tab active có viền primary + glow.
+7. **Lazy-fire các `useQuery` không nằm trong 2-3 hàng đầu**
+   - Dùng option `enabled` của react-query, chỉ bật khi `LazyRow` của hàng đó visible.
+   - Trang chủ chỉ gọi 2-3 API ngay từ đầu thay vì 13.
 
----
+8. **Giảm số card mỗi hàng** từ 24 xuống 14-16 (vẫn đủ để scroll ngang) — giảm ~30% DOM mỗi hàng.
 
-### 5. Diễn viên dạng avatar tròn
+9. **Giữ `CardZoomProvider` nhưng giảm delay từ 520ms → 280ms** và tắt overlay trên thiết bị `prefers-reduced-motion`.
 
-`src/pages/MovieDetail.tsx`:
-- Sau phần "Nội dung", thêm section "Diễn viên".
-- Render `m.actor` thành hàng cuộn ngang, mỗi item: avatar tròn 80x80 + tên ở dưới.
-- API KKPhim không trả ảnh diễn viên → dùng dịch vụ ảnh fallback: gọi TMDB search person (free, no key cần) hoặc fallback initials avatar (chữ cái đầu trên nền gradient) nếu không có ảnh. Mặc định dùng **initials avatar** (đảm bảo luôn hiển thị, không phụ thuộc external API). Nếu user muốn ảnh thật sẽ thêm TMDB sau.
+## Files sẽ sửa
 
----
+- `src/App.tsx` — bọc routes bằng `lazy()` + `<Suspense>`
+- `index.html` — thêm preconnect/dns-prefetch
+- `src/pages/Index.tsx` — bỏ `refetchInterval`, đặt `staleTime`, giảm số lượng query mở ngay, dùng `LazyRow`
+- `src/components/MovieCard.tsx` — bỏ `will-change`, thêm `width`/`height`
+- `src/components/MovieRow.tsx` — wrap nội dung trong observer
+- `src/components/LazyRow.tsx` *(tạo mới)* — wrapper IntersectionObserver
+- `src/components/CardZoomProvider.tsx` — giảm thời gian transition
 
-### Files sẽ tạo/sửa
+## Câu hỏi cho bạn
 
-**Tạo mới:**
-- `supabase/migrations/...watch_rooms.sql`
-- `supabase/functions/verify-room/index.ts`
-- `src/pages/WatchParty.tsx`
-- `src/components/CreateRoomDialog.tsx`
-- `src/components/ActorAvatars.tsx`
+Bạn muốn mình làm:
+- **Chỉ Nhóm A** (quick wins, ~5 file, ít rủi ro, kỳ vọng FCP từ 4,6s → ~2s)?
+- **Cả A + B** (toàn diện, kỳ vọng FCP ~1,2s + scroll mượt hẳn, có thay đổi cấu trúc MovieRow)?
 
-**Sửa:**
-- `src/components/Header.tsx` (menu quốc gia)
-- `src/components/HlsPlayer.tsx` (±5s)
-- `src/components/MovieRow.tsx` hoặc tab ngôn ngữ trên `Index.tsx` (tab to hơn + poster)
-- `src/pages/MovieDetail.tsx` (avatars + nút xem chung)
-- `src/pages/Watch.tsx` (nút xem chung)
-- `src/App.tsx` (route `/phong/:code`)
-
----
-
-### Câu hỏi cần xác nhận trước khi build
-
-- Voice chat: chấp nhận giới hạn thực tế ~10 người do dùng WebRTC mesh (không tốn server)? Hay muốn bắt buộc 40 người voice (cần tích hợp dịch vụ SFU như LiveKit, có chi phí)?
-- Ảnh diễn viên: dùng initials avatar (gradient + chữ cái) hay tích hợp TMDB lấy ảnh thật?
+Hoặc nếu bạn có hàng/khu vực nào *bắt buộc* phải hiện ngay (vd Hero + TopRanked + Hoạt hình 3D), cứ nói để mình ưu tiên giữ nguyên không lazy.

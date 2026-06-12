@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,21 +8,29 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { Layout } from "@/components/Layout";
 import Index from "./pages/Index.tsx";
-import MovieDetail from "./pages/MovieDetail.tsx";
-import Watch from "./pages/Watch.tsx";
-import MovieList from "./pages/MovieList.tsx";
-import SearchPage from "./pages/Search.tsx";
-import Category from "./pages/Category.tsx";
-import Auth from "./pages/Auth.tsx";
-import Favorites from "./pages/Favorites.tsx";
-import History from "./pages/History.tsx";
-import Settings from "./pages/Settings.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import WatchParty from "./pages/WatchParty.tsx";
+
+// Code-split mọi route phụ — giảm bundle khởi đầu (hls.js, supabase realtime, ...)
+const MovieDetail = lazy(() => import("./pages/MovieDetail.tsx"));
+const Watch = lazy(() => import("./pages/Watch.tsx"));
+const MovieList = lazy(() => import("./pages/MovieList.tsx"));
+const SearchPage = lazy(() => import("./pages/Search.tsx"));
+const Category = lazy(() => import("./pages/Category.tsx"));
+const Auth = lazy(() => import("./pages/Auth.tsx"));
+const Favorites = lazy(() => import("./pages/Favorites.tsx"));
+const History = lazy(() => import("./pages/History.tsx"));
+const Settings = lazy(() => import("./pages/Settings.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const WatchParty = lazy(() => import("./pages/WatchParty.tsx"));
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: 1 } },
+  defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: 1, refetchOnWindowFocus: false } },
 });
+
+const RouteFallback = () => (
+  <div className="flex min-h-[60vh] items-center justify-center">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -34,18 +43,18 @@ const App = () => (
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />
-                <Route path="/phim/:slug" element={<MovieDetail />} />
-                <Route path="/xem/:slug/:episode" element={<Watch />} />
-                <Route path="/danh-sach/:type" element={<MovieList />} />
-                <Route path="/the-loai/:slug" element={<Category mode="category" />} />
-                <Route path="/quoc-gia/:slug" element={<Category mode="country" />} />
-                <Route path="/tim-kiem" element={<SearchPage />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/yeu-thich" element={<Favorites />} />
-                <Route path="/lich-su" element={<History />} />
-                <Route path="/cai-dat" element={<Settings />} />
-                <Route path="/phong/:code" element={<WatchParty />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/phim/:slug" element={<Suspense fallback={<RouteFallback />}><MovieDetail /></Suspense>} />
+                <Route path="/xem/:slug/:episode" element={<Suspense fallback={<RouteFallback />}><Watch /></Suspense>} />
+                <Route path="/danh-sach/:type" element={<Suspense fallback={<RouteFallback />}><MovieList /></Suspense>} />
+                <Route path="/the-loai/:slug" element={<Suspense fallback={<RouteFallback />}><Category mode="category" /></Suspense>} />
+                <Route path="/quoc-gia/:slug" element={<Suspense fallback={<RouteFallback />}><Category mode="country" /></Suspense>} />
+                <Route path="/tim-kiem" element={<Suspense fallback={<RouteFallback />}><SearchPage /></Suspense>} />
+                <Route path="/auth" element={<Suspense fallback={<RouteFallback />}><Auth /></Suspense>} />
+                <Route path="/yeu-thich" element={<Suspense fallback={<RouteFallback />}><Favorites /></Suspense>} />
+                <Route path="/lich-su" element={<Suspense fallback={<RouteFallback />}><History /></Suspense>} />
+                <Route path="/cai-dat" element={<Suspense fallback={<RouteFallback />}><Settings /></Suspense>} />
+                <Route path="/phong/:code" element={<Suspense fallback={<RouteFallback />}><WatchParty /></Suspense>} />
+                <Route path="*" element={<Suspense fallback={<RouteFallback />}><NotFound /></Suspense>} />
               </Route>
             </Routes>
           </BrowserRouter>

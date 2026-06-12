@@ -27,7 +27,13 @@ export function CardZoomProvider({ children }: { children: React.ReactNode }) {
   const navTimer = useRef<number | null>(null);
 
   const openZoom = useCallback<Ctx["openZoom"]>((e, { src, to, borderRadius = 6 }) => {
-    // Find the nearest element with bounding rect (the card link)
+    // Tôn trọng prefers-reduced-motion: điều hướng thẳng, không animate
+    const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      e.preventDefault();
+      navigate(to);
+      return;
+    }
     const el = (e.currentTarget as HTMLElement).closest("a, [data-zoom-target]") as HTMLElement | null;
     const target = el ?? (e.currentTarget as HTMLElement);
     const rect = target.getBoundingClientRect();
@@ -35,19 +41,17 @@ export function CardZoomProvider({ children }: { children: React.ReactNode }) {
     e.stopPropagation();
     setState({ src, rect, to, borderRadius });
     setPhase("start");
-    // Trigger transition on next frame
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setPhase("expand"));
     });
     if (navTimer.current) window.clearTimeout(navTimer.current);
     navTimer.current = window.setTimeout(() => {
       navigate(to);
-      // Keep the overlay one extra frame so the destination paints under it
       window.setTimeout(() => {
         setPhase("done");
         setState(null);
-      }, 60);
-    }, 520);
+      }, 40);
+    }, 280);
   }, [navigate]);
 
   useEffect(() => () => { if (navTimer.current) window.clearTimeout(navTimer.current); }, []);
@@ -62,7 +66,7 @@ export function CardZoomProvider({ children }: { children: React.ReactNode }) {
         >
           {/* Backdrop fade */}
           <div
-            className="absolute inset-0 bg-background transition-opacity duration-500 ease-out"
+            className="absolute inset-0 bg-background transition-opacity duration-300 ease-out"
             style={{ opacity: phase === "expand" ? 1 : 0 }}
           />
           {/* Zooming image - FLIP from card rect to fullscreen */}
@@ -78,12 +82,12 @@ export function CardZoomProvider({ children }: { children: React.ReactNode }) {
                 ? "0 0 0 0 rgba(0,0,0,0)"
                 : "0 30px 80px -20px rgba(0,0,0,0.8)",
               transition:
-                "top 520ms cubic-bezier(0.32, 0.72, 0, 1)," +
-                "left 520ms cubic-bezier(0.32, 0.72, 0, 1)," +
-                "width 520ms cubic-bezier(0.32, 0.72, 0, 1)," +
-                "height 520ms cubic-bezier(0.32, 0.72, 0, 1)," +
-                "border-radius 520ms cubic-bezier(0.32, 0.72, 0, 1)," +
-                "box-shadow 520ms ease-out",
+                "top 280ms cubic-bezier(0.32, 0.72, 0, 1)," +
+                "left 280ms cubic-bezier(0.32, 0.72, 0, 1)," +
+                "width 280ms cubic-bezier(0.32, 0.72, 0, 1)," +
+                "height 280ms cubic-bezier(0.32, 0.72, 0, 1)," +
+                "border-radius 280ms cubic-bezier(0.32, 0.72, 0, 1)," +
+                "box-shadow 280ms ease-out",
             }}
           >
             <img
@@ -92,14 +96,14 @@ export function CardZoomProvider({ children }: { children: React.ReactNode }) {
               className="h-full w-full object-cover"
               style={{
                 transform: phase === "expand" ? "scale(1.04)" : "scale(1)",
-                transition: "transform 520ms cubic-bezier(0.32, 0.72, 0, 1)",
+                transition: "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
               }}
             />
             <div
               className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
               style={{
                 opacity: phase === "expand" ? 1 : 0,
-                transition: "opacity 400ms ease-out 120ms",
+                transition: "opacity 240ms ease-out 60ms",
               }}
             />
           </div>
