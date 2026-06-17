@@ -42,7 +42,7 @@ function imdbScore(m: PhimItem): number {
 const CACHE = { staleTime: 10 * 60_000, gcTime: 30 * 60_000, refetchOnWindowFocus: false } as const;
 
 // Giới hạn 16 item/hàng (đủ scroll ngang, giảm 30% DOM so với 24)
-const trim = (arr: PhimItem[] = []) => arr.slice(0, 16);
+const trim = (arr: PhimItem[] = []) => arr.slice(0, 12);
 
 export default function Index() {
   // Eager: chỉ load các hàng above-the-fold
