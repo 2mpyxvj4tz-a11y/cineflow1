@@ -46,7 +46,7 @@ export function TopRankedRow({ movies, loading }: Props) {
                   {/* Giant rank number */}
                   <span
                     aria-hidden
-                    className="absolute -left-1 bottom-0 select-none font-black leading-none text-transparent transition-transform duration-500 ease-out group-hover:scale-110"
+                    className="absolute -left-1 bottom-0 select-none font-black leading-none text-transparent"
                     style={{
                       fontSize: "10rem",
                       WebkitTextStroke: "3px hsl(var(--foreground))",
