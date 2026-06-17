@@ -55,13 +55,16 @@ export function TopRankedRow({ movies, loading }: Props) {
                   >
                     {idx + 1}
                   </span>
-                  <div className="relative z-10 w-[140px] overflow-hidden rounded-md nf-card-shadow transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] md:w-[180px]">
+                  <div className="relative z-10 w-[140px] overflow-hidden rounded-md nf-card-shadow transition-transform duration-200 ease-out group-hover:scale-[1.04] md:w-[180px]">
                     <div className="aspect-[2/3]">
                       <img
                         src={img}
                         alt={m.name}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        decoding="async"
+                        width={180}
+                        height={270}
+                        className="h-full w-full object-cover"
                         onError={(e) => ((e.currentTarget as HTMLImageElement).src = "/placeholder.svg")}
                       />
                     </div>
