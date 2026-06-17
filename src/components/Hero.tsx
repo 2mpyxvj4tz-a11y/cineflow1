@@ -25,22 +25,27 @@ export function Hero({ movies }: Props) {
 
   return (
     <section className="relative h-[85vh] min-h-[560px] w-full overflow-hidden">
-      {slides.map((m, i) => (
-        <div
-          key={m.slug}
-          className={`absolute inset-0 transition-opacity ease-[cubic-bezier(0.4,0,0.2,1)] ${
-            i === idx ? "opacity-100 duration-[1400ms]" : "opacity-0 duration-700"
-          }`}
-        >
-          <img
-            src={fixImg(m.thumb_url || m.poster_url)}
-            alt={m.name}
-            className={`h-full w-full object-cover will-change-transform ${
-              i === idx ? "animate-[kenburns_8s_ease-out_forwards]" : ""
-            }`}
-          />
-        </div>
-      ))}
+      {slides.map((m, i) => {
+        const active = i === idx;
+        // Chỉ mount slide hiện tại + 1 slide kế tiếp để giảm DOM & decode ảnh
+        const next = (idx + 1) % slides.length;
+        if (!active && i !== next) return null;
+        return (
+          <div
+            key={m.slug}
+            className={`absolute inset-0 transition-opacity duration-700 ${active ? "opacity-100" : "opacity-0"}`}
+          >
+            <img
+              src={fixImg(m.thumb_url || m.poster_url)}
+              alt={m.name}
+              loading={active ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={active ? "high" : "low"}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        );
+      })}
       <div className="absolute inset-0 gradient-hero-side" />
       <div className="absolute inset-0 gradient-hero" />
 

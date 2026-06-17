@@ -42,7 +42,7 @@ function imdbScore(m: PhimItem): number {
 const CACHE = { staleTime: 10 * 60_000, gcTime: 30 * 60_000, refetchOnWindowFocus: false } as const;
 
 // Giới hạn 16 item/hàng (đủ scroll ngang, giảm 30% DOM so với 24)
-const trim = (arr: PhimItem[] = []) => arr.slice(0, 16);
+const trim = (arr: PhimItem[] = []) => arr.slice(0, 12);
 
 export default function Index() {
   // Eager: chỉ load các hàng above-the-fold
@@ -111,9 +111,10 @@ export default function Index() {
         <TopRankedRow movies={ranked} loading={newQ.isLoading && auMyQ.isLoading} />
         <WorldClock />
         <MovieRow title="🔥 Đề xuất - Phim Âu Mỹ" movies={trim(auMyTop)} loading={auMyQ.isLoading} viewAllHref="/quoc-gia/au-my" />
-        <MovieRow title="Mới cập nhật" movies={trim(sortByQuality(newQ.data?.items ?? []))} loading={newQ.isLoading} />
 
-        {/* Lazy mount: chỉ render & fetch khi cuộn tới */}
+        <LazyRow minHeight={380}>
+          <MovieRow title="Mới cập nhật" movies={trim(sortByQuality(newQ.data?.items ?? []))} loading={newQ.isLoading} />
+        </LazyRow>
         <LazyRow onVisible={() => markVisible("donghua")} minHeight={380}>
           {(donghuaQ.data?.length ?? 0) > 0 && (
             <MovieRow title="🐉 Hoạt hình 3D Donghua" movies={donghuaQ.data ?? []} loading={donghuaQ.isLoading} />
