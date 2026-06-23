@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, Menu, X, Moon, Sun, Heart, History as HistoryIcon, Settings as SettingsIcon, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Menu, X, Moon, Sun, Heart, History as HistoryIcon, Settings as SettingsIcon, LogOut, User as UserIcon, Radio } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "./AuthProvider";
 import { useQuery } from "@tanstack/react-query";
@@ -140,6 +140,15 @@ export function Header() {
             />
           </div>
         </form>
+
+        <Link
+          to="/truc-tiep"
+          className="flex items-center gap-1.5 rounded-full bg-red-600 px-2.5 py-1 text-xs font-bold text-white shadow-md hover:bg-red-700"
+          aria-label="Xem bóng đá trực tiếp"
+        >
+          <Radio className="h-3.5 w-3.5 animate-pulse" />
+          <span className="hidden sm:inline">LIVE</span>
+        </Link>
 
         <button
           aria-label="Tìm kiếm"
