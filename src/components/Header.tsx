@@ -12,6 +12,7 @@ const NAV = [
   { to: "/danh-sach/phim-bo", label: "Phim bộ" },
   { to: "/danh-sach/hoat-hinh", label: "Hoạt hình" },
   { to: "/danh-sach/tv-shows", label: "TV Shows" },
+  { to: "/truc-tiep", label: "Trực tiếp" },
 ];
 
 export function Header() {
